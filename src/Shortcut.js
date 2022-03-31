@@ -8,9 +8,8 @@ export class Shortcut extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            image: props.link + '/favicon.ico'
+            image: '/api/favicon?url=' + encodeURIComponent(this.props.link)
         }
-
     }
 
     render() {

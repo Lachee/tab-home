@@ -10,8 +10,8 @@ function App() {
         <img src={logo} className="App-logo" alt="logo" />
         <p>
           <Button color="primary">This is a test button</Button>
-          <Shortcut link="https://chickatrice.net"></Shortcut>
         </p>
+          <Shortcut link="https://chickatrice.net"></Shortcut>
         <a
           className="App-link"
           href="https://reactjs.org"
