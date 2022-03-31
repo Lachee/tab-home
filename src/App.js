@@ -1,6 +1,7 @@
 import logo from './logo.svg';
 import './App.scss';
 import { Button } from 'react-bulma-components';
+import { Shortcut } from './Shortcut';
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
         <img src={logo} className="App-logo" alt="logo" />
         <p>
           <Button color="primary">This is a test button</Button>
+          <Shortcut link="https://chickatrice.net"></Shortcut>
         </p>
         <a
           className="App-link"
