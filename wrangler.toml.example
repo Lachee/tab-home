@@ -1,0 +1,11 @@
+name = 'tab-home'
+type = 'webpack'
+account_id = ''
+zone_id = ''
+usage_model = ''
+workers_dev = true
+target_type = "webpack"
+
+[site]
+bucket = "./build"
+entry-point = "workers-site"
