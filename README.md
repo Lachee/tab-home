@@ -24,6 +24,13 @@ Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
+
+### `npm run deploy`
+
+Deploys the last `build` to CloudFlare via the wrangler tool.
+
 ### `npm run publish`
 
-Builds and publishes it to cloudflare
+Builds the project and then deploys it automatically to CloudFlare via the wrangler tool. 
+
+See also: `npm run build` and `npm run deploy`
