@@ -12,7 +12,7 @@ export class ShortcutList extends React.Component {
     add(link) {
         const links = this.state.links;
         links.push(link);
-        this.setState({links: links});
+        this.setState({ links: links });
     }
 
     remove(link) {
@@ -20,15 +20,16 @@ export class ShortcutList extends React.Component {
         const index = links.indexOf(link);
         if (index >= 0) {
             links.splice(index, 1);
-            this.setState({links: links});
+            this.setState({ links: links });
             console.log('removed ', link, this.state.links);
         }
     }
 
-    handleRemove = (e) => {
-        console.log('Removing URL', e.target.value);
-        this.remove(e.target.value);
-    }
+    // Test Button to remove elemenets
+    // handleRemove = (e) => {
+    //     console.log('Removing URL', e.target.value);
+    //     this.remove(e.target.value);
+    // }
 
     render() {
         return (
@@ -48,8 +49,8 @@ export class ShortcutList extends React.Component {
  * @property {String} link the link to the webpage
  */
 export class Shortcut extends React.Component {
-    
-    defaultImage = 'logo512.png'; 
+
+    defaultImage = 'logo512.png';
 
     constructor(props) {
         super(props);
