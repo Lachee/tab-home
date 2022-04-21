@@ -76,15 +76,15 @@ async function handleEvent(event) {
 
     } catch (e) {
         // if an error is thrown try to serve the asset at 404.html
-        if (!DEBUG) {
-            try {
-                let notFoundResponse = await getAssetFromKV(event, {
-                    mapRequestToAsset: req => new Request(`${new URL(req.url).origin}/404.html`, req),
-                })
-
-                return new Response(notFoundResponse.body, { ...notFoundResponse, status: 404 })
-            } catch (e) { }
-        }
+        // if (!DEBUG) {
+        //     try {
+        //         let notFoundResponse = await getAssetFromKV(event, {
+        //             mapRequestToAsset: req => new Request(`${new URL(req.url).origin}/404.html`, req),
+        //         })
+        // 
+        //         return new Response(notFoundResponse.body, { ...notFoundResponse, status: 404 })
+        //     } catch (e) { }
+        // }
 
         console.error('Failed to fetch:', e.message);
         return new Response(e.message || e.toString(), { status: 500 })
