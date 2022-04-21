@@ -56,7 +56,7 @@ export class Shortcut extends React.Component {
 
         this.defaultImage = props.defaultImage || this.defaultImage;
         this.state = {
-            image: props.link + '/favicon.ico'
+            image: '/api/favicon?url=' + encodeURIComponent(this.props.link)
         }
     }
 
