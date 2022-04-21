@@ -1,5 +1,5 @@
 import { getAssetFromKV, mapRequestToAsset } from '@cloudflare/kv-asset-handler'
-import { fetchFavicon } from './Favicon';
+import { discoverFavicon } from './Favicon';
 
 /**
  * The DEBUG flag will do two things that help during development:
@@ -65,9 +65,9 @@ async function handleEvent(event) {
             case '/api/favicon':
                 response = await cache.match(event.request, {});
                 if (!response) { 
-                    const favicon = await fetchFavicon(url.searchParams.get('url'));
-                    response = Response.redirect(favicon).clone();
-                    event.waitUntil(cache.put(event.request, response));
+                    const favicon = await discoverFavicon(url.searchParams.get('url'));
+                    response = (await fetch(favicon));
+                    event.waitUntil(cache.put(event.request, response.clone()));
                 }
                 return response;
 

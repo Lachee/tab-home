@@ -1,4 +1,4 @@
-export async function fetchFavicon(url) {
+export async function discoverFavicon(url) {
     const quickSearch = (async () => {
         const faviconUrl = (new URL('/favicon.ico', url)).toString();
         const response = await fetch(faviconUrl, { method: 'HEAD' });
