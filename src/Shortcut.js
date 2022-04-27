@@ -9,6 +9,17 @@ export class ShortcutList extends React.Component {
         }
     }
 
+    /** Exports the stored shortcuts to a string */
+    export() {
+        return JSON.stringify(this.state.links);
+    }
+
+    /** Imports the data  */
+    import(data) {
+        const json = JSON.parse(data);
+        this.setState({ links: json });
+    }
+
     add(link) {
         const links = this.state.links;
         links.push(link);
