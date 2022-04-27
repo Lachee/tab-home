@@ -1,4 +1,5 @@
 import React from 'react';
+import { Favicon } from './Favicon';
 import './Shortcut.scss';
 
 export class ShortcutList extends React.Component {
@@ -61,25 +62,14 @@ export class ShortcutList extends React.Component {
  */
 export class Shortcut extends React.Component {
 
-    defaultImage = 'logo512.png';
-
     constructor(props) {
         super(props);
-
-        this.defaultImage = props.defaultImage || this.defaultImage;
-        this.state = {
-            image: '/api/favicon?url=' + encodeURIComponent(this.props.link)
-        }
-    }
-
-    handleImageError = (e) => {
-        e.target.src = this.defaultImage;
     }
 
     render() {
         return (
             <a className="Shortcut" href={this.props.link}>
-                <img src={this.state.image} onError={this.handleImageError}></img>
+                <Favicon site={this.props.link}></Favicon>
             </a>
         );
     }
