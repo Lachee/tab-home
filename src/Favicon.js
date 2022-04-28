@@ -18,7 +18,7 @@ export class Favicon extends React.Component {
 
     render() {
         return (
-            <img className="favicon" src={(this.props.absolute || 'https://tab.lu.je/')+'api/favicon?url=' + encodeURIComponent(this.props.site)} alt="favicon" onError={this.handleImageError}></img>
+            <img className="favicon" src={(this.props.absolute || 'https://tab.lu.je/')+'api/favicon?url=' + encodeURIComponent(this.props.site)} alt={this.props.alt || 'favicon'} onError={this.handleImageError}></img>
         )    
            
     }

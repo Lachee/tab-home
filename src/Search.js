@@ -10,9 +10,9 @@ export class Search extends React.Component {
         super(props);
 
         this.engines = props.engines || {
-            "ddg": { search: "https://duckduckgo.com/?q={query}" },
-            "google": { search: "https://google.com.au/search?q={query}" },
-            "bing": { search: "https://bing.com/search?q={query}" }
+            "ddg": { search: "https://duckduckgo.com/?q={query}", name: 'Duck Duck Go'},
+            "google": { search: "https://google.com.au/search?q={query}", name: 'Google' },
+            "bing": { search: "https://bing.com/search?q={query}", name: 'Bing' }
         };
 
         this.state = Object.assign(
@@ -29,9 +29,8 @@ export class Search extends React.Component {
             throw new Error('Cannot set engine to ' + engine + ' because it is not defined');
         
 
-        return { 
-            search: properties.search, 
-            engine: engine 
+        return {  
+            engine: properties
         }
     }
 
@@ -51,21 +50,18 @@ export class Search extends React.Component {
     }
 
     handleSubmitClick = (event) => {
-        let url = this.state.search.replace("{query}", encodeURIComponent(this.state.query));
+        let url = this.state.engine.search.replace("{query}", encodeURIComponent(this.state.query));
         window.location = url;
     }
 
     render() {
         return (
-            <div className="field has-addons">
+            <div className={`field has-addons has-addons-fullwidth ${this.props.className}`}>
                 <Form.Control className="has-icons-left">
-                    <Form.Input value={this.state.query} onChange={this.handleQueryChange} onKeyPress={this.handleQueryKeyPress} autoFocus></Form.Input>
+                    <Form.Input placeholder={`Search with ${this.state.engine.name}...`} value={this.state.query} onChange={this.handleQueryChange} onKeyPress={this.handleQueryKeyPress} autoFocus></Form.Input>
                     <span className="icon is-small is-left">
-                        <Favicon site={this.state.search}></Favicon>
+                        <Favicon alt={this.state.engine.name} site={this.state.engine.search}></Favicon>
                     </span>
-                </Form.Control>
-                <Form.Control>
-                    <Button color="primary" onClick={this.handleSubmitClick}>search</Button>
                 </Form.Control>
             </div>
         )
