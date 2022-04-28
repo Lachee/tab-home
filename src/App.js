@@ -2,6 +2,7 @@ import logo from './logo.svg';
 import './App.scss';
 import { Button } from 'react-bulma-components';
 import { Shortcut, ShortcutList } from './Shortcut';
+import { Search } from './Search';
 
 const links = [
   'https://chickatrice.net',
@@ -14,7 +15,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <Button color="primary">This is a test button</Button>
+        <Search engine="ddg"></Search>
         <ShortcutList links={links}></ShortcutList>
         <a
           className="App-link"
