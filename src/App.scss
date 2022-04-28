@@ -5,6 +5,10 @@
 
 @import '~bulma';
 
+* {
+  color: rgb(185, 185, 185);
+}
+
 .App {
   text-align: center;
 }
@@ -42,4 +46,13 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+
+kbd {
+  background-color: white;
+  color: #b32424;
+  padding: 0 5px 0 5px;
+  border: 1px solid gray;
+  border-radius: 5px;
 }

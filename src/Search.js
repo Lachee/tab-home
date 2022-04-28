@@ -58,7 +58,7 @@ export class Search extends React.Component {
         return (
             <div className={`field has-addons has-addons-fullwidth ${this.props.className}`}>
                 <Form.Control className="has-icons-left">
-                    <Form.Input placeholder={`Search with ${this.state.engine.name}...`} value={this.state.query} onChange={this.handleQueryChange} onKeyPress={this.handleQueryKeyPress} autoFocus></Form.Input>
+                    <Form.Input placeholder={`Search with ${this.state.engine.name}...`} value={this.state.query} onChange={this.handleQueryChange} onKeyPress={this.handleQueryKeyPress} autoFocus={this.props.autoFocus}></Form.Input>
                     <span className="icon is-small is-left">
                         <Favicon alt={this.state.engine.name} site={this.state.engine.search}></Favicon>
                     </span>
