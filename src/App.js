@@ -1,7 +1,6 @@
 import logo from './logo.svg';
 import './App.scss';
-import { Button } from 'react-bulma-components';
-import { Shortcut, ShortcutList } from './Shortcut';
+import { ShortcutList } from './Shortcut';
 import { Search } from './Search';
 
 const links = [
