@@ -59,7 +59,7 @@ export class Search extends React.Component {
         return (
             <div className="field has-addons">
                 <Form.Control className="has-icons-left">
-                    <Form.Input value={this.state.query} onChange={this.handleQueryChange} onKeyPress={this.handleQueryKeyPress}></Form.Input>
+                    <Form.Input value={this.state.query} onChange={this.handleQueryChange} onKeyPress={this.handleQueryKeyPress} autoFocus></Form.Input>
                     <span className="icon is-small is-left">
                         <Favicon site={this.state.search}></Favicon>
                     </span>
