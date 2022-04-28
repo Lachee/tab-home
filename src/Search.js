@@ -1,5 +1,6 @@
 import React from "react";
 import { Button, Form } from 'react-bulma-components';
+import { Favicon } from "./Favicon";
 
 export class Search extends React.Component {
 
@@ -14,7 +15,12 @@ export class Search extends React.Component {
             "bing": { search: "https://bing.com/search?q={query}" }
         };
 
-        this.state = Object.assign({ query: '' }, this._prepareEngineState(this.props.engine || 'ddg'));
+        this.state = Object.assign(
+            { query: '' }, 
+            this._prepareEngineState(this.props.engine || 'ddg')
+        );
+
+        window.search = this;
     }
 
     _prepareEngineState(engine) {
@@ -51,9 +57,16 @@ export class Search extends React.Component {
 
     render() {
         return (
-            <div>
-                <Form.Input value={this.state.query} onChange={this.handleQueryChange} onKeyPress={this.handleQueryKeyPress}></Form.Input>
-                <Button onClick={this.handleSubmitClick}></Button>
+            <div className="field has-addons">
+                <Form.Control className="has-icons-left">
+                    <Form.Input value={this.state.query} onChange={this.handleQueryChange} onKeyPress={this.handleQueryKeyPress}></Form.Input>
+                    <span className="icon is-small is-left">
+                        <Favicon site={this.state.search}></Favicon>
+                    </span>
+                </Form.Control>
+                <Form.Control>
+                    <Button color="primary" onClick={this.handleSubmitClick}>search</Button>
+                </Form.Control>
             </div>
         )
     }
