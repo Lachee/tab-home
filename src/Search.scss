@@ -1,0 +1,16 @@
+.search {
+    .fake-button {
+        margin-right: -38px;
+        float: left;
+        position: relative;
+        z-index: 9999999;
+        content: '';
+        background: transparent;
+        border: none;
+        width: 40px;
+    }
+    .control .input { 
+        border-radius: 4px !important;
+        padding-left: 3em !important;
+    }
+}

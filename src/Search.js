@@ -2,6 +2,8 @@ import React from "react";
 import { Button, Form } from 'react-bulma-components';
 import { Favicon } from "./Favicon";
 
+import './Search.scss';
+
 export class Search extends React.Component {
 
     engines = {};
@@ -29,13 +31,15 @@ export class Search extends React.Component {
             throw new Error('Cannot set engine to ' + engine + ' because it is not defined');
         
 
-        return {  
-            engine: properties
+        return {
+            engineKey:  engine,
+            engine:     properties
         }
     }
 
 
     setEngine(engine) {
+        console.log('Setting engine to ', engine);
         this.setState(this._prepareEngineState(engine));
     }
 
@@ -43,6 +47,7 @@ export class Search extends React.Component {
         this.setState({query: event.target.value});
     }
 
+    
     handleQueryKeyPress = (event) => {
         if (event.key === 'Enter') {
             this.handleSubmitClick(event);
@@ -54,14 +59,22 @@ export class Search extends React.Component {
         window.location = url;
     }
 
+    handleFaviconClick = (event) => {
+        const keys = Object.keys(this.engines);
+        let index = keys.indexOf(this.state.engineKey);
+        index = (index + 1) % keys.length;
+        this.setEngine(keys[index]);
+    }
+
     render() {
         return (
-            <div className={`field has-addons has-addons-fullwidth ${this.props.className}`}>
+            <div className={`search field has-addons has-addons-fullwidth ${this.props.className}`}>
+            <Button className="fake-button" onClick={this.handleFaviconClick}></Button>
                 <Form.Control className="has-icons-left">
                     <Form.Input placeholder={`Search with ${this.state.engine.name}...`} value={this.state.query} onChange={this.handleQueryChange} onKeyPress={this.handleQueryKeyPress} autoFocus={this.props.autoFocus}></Form.Input>
-                    <span className="icon is-small is-left">
-                        <Favicon alt={this.state.engine.name} site={this.state.engine.search}></Favicon>
-                    </span>
+                    <div  onClick={this.handleFaviconClick} className="icon is-small is-left">
+                        <Favicon alt={this.state.engine.name} site={this.state.engine.search} ></Favicon>
+                    </div>
                 </Form.Control>
             </div>
         )
