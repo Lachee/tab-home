@@ -191,7 +191,8 @@ export class TimePiece {
         ctx.fillText("Frame: " + this.frame, 0, height);
         ctx.fillText("Now: " + (new Date()).toLocaleString(), 0, height - 10);
         ctx.fillText("Mouse: " + this.mouse.position.toString(), 0, height - 20);
-        ctx.fillRect(this.mouse.x, this.mouse.y, 5, 5);
+        //ctx.fillRect(this.mouse.x, this.mouse.y, 5, 5);
+        
         // Handle
         ctx.fillText("Value: :" + this.handle.value, 0, height - 30);
         this.handle.draw(ctx);
