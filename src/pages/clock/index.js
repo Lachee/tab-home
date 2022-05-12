@@ -4,7 +4,7 @@ export const ClockPage = () => {
     return (
         <div className="clock">
             <h1>It's a clock</h1>
-            <Clock width='640px' height='425px'></Clock>
+            <Clock width='400px' height='400px'></Clock>
         </div>
     )
 };
