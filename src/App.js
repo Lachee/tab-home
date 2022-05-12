@@ -4,6 +4,7 @@ import { Layout } from './pages/Layout';
 import { Error404 } from './pages/Errors';
 
 import { TabPage } from './pages/tabs';
+import { ClockPage } from './pages/clock';
 
 import './App.scss';
 
@@ -15,6 +16,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<TabPage />} />
+            <Route path="/clock" element={<ClockPage />} />
             <Route path="*" element={<Error404 />} />
           </Route>
         </Routes>
