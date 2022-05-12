@@ -1,7 +1,6 @@
 import { ShortcutList } from './Shortcut';
 import { Search } from './Search';
 import { Block, Container, Hero, Level } from 'react-bulma-components';
-import logo from '../logo.svg';
 
 const links = [
     'https://chickatrice.net',

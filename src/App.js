@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Layout } from './pages/Layout';
 import { Error404 } from './pages/Errors';
 
-import { TabPage } from './tabs';
+import { TabPage } from './pages/tabs';
 
 import './App.scss';
 
