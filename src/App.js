@@ -1,31 +1,23 @@
-import logo from './logo.svg';
-import './App.scss';
-import { ShortcutList } from './Shortcut';
-import { Search } from './Search';
-import { Block, Container, Hero, Level } from 'react-bulma-components';
 
-const links = [
-  'https://chickatrice.net',
-  'https://twitter.com',
-  'https://lachee.dev'
-]
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Home } from './pages/Home';
+import { Error404 } from './pages/Errors';
+
+import './App.scss';
+import { Layout } from './pages/Layout';
+
 
 function App() {
   return (
     <div className="App">
-      <Hero backgroundColor='dark' className='is-fullheight'>
-        <Hero.Body className="is-fullwidth">
-          <Container>
-            <Block>
-              <Search engine="ddg" autoFocus={true}></Search>
-              <p>Focus Addressbar with <kbd>ctrl + L</kbd></p>
-            </Block>
-            <Block>
-              <ShortcutList links={links}></ShortcutList>
-            </Block>
-          </Container>
-        </Hero.Body>
-      </Hero>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="*" element={<Error404 />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }

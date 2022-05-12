@@ -1,4 +1,4 @@
-import { getAssetFromKV, mapRequestToAsset } from '@cloudflare/kv-asset-handler'
+import { getAssetFromKV, mapRequestToAsset, NotFoundError } from '@cloudflare/kv-asset-handler'
 import { discoverFavicon } from './Favicon';
 
 /**
@@ -52,8 +52,28 @@ async function handleEvent(event) {
         switch(url.pathname) {
             // Basic static content serving
             default:
-                const page = await getAssetFromKV(event, options);
-                response = new Response(page.body, page);
+                try {
+                    console.log('fetching assets', event.request.url);
+                    const page = await getAssetFromKV(event, options);
+                    response = new Response(page.body, page);
+                } catch(e) {
+                    if (e instanceof NotFoundError) {
+                        // 404s should get a redirect to asset to let React handle
+                        options.mapRequestToAsset = (request) => {
+                            const defaultUrl = (new URL(request.url)).origin;
+                            const defaultAssetKey = mapRequestToAsset(new Request(defaultUrl, request));
+                            
+                            const url = new URL(defaultAssetKey.url);
+                            return new Request(url.toString(), request);
+                        };
+
+                        const errpage = await getAssetFromKV(event, options);
+                        response = new Response(errpage.body, errpage);
+                    } else {
+                        // Every other error handle as normal
+                        throw e;
+                    }
+                }
                 response.headers.set("X-XSS-Protection", "1; mode=block");
                 response.headers.set("X-Content-Type-Options", "nosniff");
                 response.headers.set("X-Frame-Options", "DENY");
