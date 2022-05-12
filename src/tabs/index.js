@@ -1,5 +1,5 @@
-import { ShortcutList } from '../Shortcut';
-import { Search } from '../Search';
+import { ShortcutList } from './Shortcut';
+import { Search } from './Search';
 import { Block, Container, Hero, Level } from 'react-bulma-components';
 import logo from '../logo.svg';
 
@@ -10,7 +10,7 @@ const links = [
 ];
 
 
-export const Home = () => {
+export const TabPage = () => {
     return (
         <div>
             <Hero backgroundColor='dark' className='is-fullheight'>

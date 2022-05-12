@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, Form } from 'react-bulma-components';
-import { Favicon } from "./Favicon";
+import { Favicon } from "../utils/Favicon";
 
 import './Search.scss';
 

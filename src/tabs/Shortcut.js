@@ -1,5 +1,5 @@
 import React from 'react';
-import { Favicon } from './Favicon';
+import { Favicon } from '../utils/Favicon';
 import './Shortcut.scss';
 
 export class ShortcutList extends React.Component {
