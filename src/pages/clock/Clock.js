@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { easeInBack, easeOutElastic } from "../../utils/Smoothing";
+import { Mouse, SlideHandle } from "./Handles";
 
 // tutorial: https://blog.cloudboost.io/using-html5-canvas-with-react-ff7d93f5dc76
 // tutorial: https://reactjs.org/docs/refs-and-the-dom.html#legacy-api-string-refs
@@ -33,9 +34,40 @@ export const TimePieceSecondMode = {
     Jittery: 'jitter',
     Smooth: 'smooth',
 }
-export class TimePiece {
 
-    
+export const TimePiecePalettes = {
+    Pastel: ["#eae4e9","#fff1e6","#fde2e4","#fad2e1","#e2ece9","#bee1e6","#f0efeb","#dfe7fd","#cddafd"]
+}
+
+class Segment {
+
+    /** @type {Date} */
+    startTime;
+    /** @type {Date} */
+    endTime;
+    /** @type {string} */
+    color;
+
+    constructor(startHours, endHours) {
+        this.startTime = new Date();
+        this.startTime.setHours(startHours);
+        this.endTime = new Date();
+        this.endTime.setHours(endHours);
+    }
+
+    getStartRadians() {
+        const hours = this.startTime.getHours();
+        return  (-Math.PI / 2) + (Math.PI*2)*(hours / 12.0);
+    }
+
+    getEndRadians() {
+        const hours = this.endTime.getHours();
+        return  (-Math.PI / 2) + (Math.PI*2)*(hours / 12.0);
+    }
+
+}
+
+export class TimePiece {
     /** @type {HTMLCanvasElement} the current canvas */
     canvas;
 
@@ -49,16 +81,36 @@ export class TimePiece {
 
     secondMode = TimePieceSecondMode.Jittery;
 
-    faceColor = '#AEAEAE';
-    numeralColor = '#000000';
+    faceColor = '#cddafd';
+    numeralColor = 'black';
+    segmentColors = TimePiecePalettes.Pastel;
+
+    /** @type {Segment[]} list of segments */
+    segments = [];
+
+    /** @type {SlideHandle} */
+    handle;
+
+    /** @type {Mouse} */
+    mouse;
 
     constructor(canvas = null) {
         if (canvas)
             this.attach(canvas);
+
+        const segment = new Segment(10, 14);
+        this.addSegment(segment);
+
+    }
+
+    addSegment(segment) {
+        if (!segment.color)
+            segment.color = this.segmentColors[(this.segments.length) % this.segmentColors.length];
+        this.segments.push(segment);
     }
 
     /** Renders a frame */
-    renderFrame() {
+    drawFrame() {
         if (this.canvas == null)
             return; 
 
@@ -71,20 +123,30 @@ export class TimePiece {
         const { width, height } = canvas;
         ctx.clearRect(0, 0, width, height);
         
-        const radius = Math.max(width, height) / 2.0 * 0.8;
+        const fRadius =  Math.max(width, height) / 2.0;
+        const radius = fRadius * 0.75;
         const x = width / 2.0;
         const y = height / 2.0;
 
         const ogFont = ctx.font;
 
-        // Draw the clock face
+        //================== Draw segment backings
+        for (let segment of this.segments) 
+        {
+            const start = segment.getStartRadians();
+            const end = segment.getEndRadians();    
+            ctx.fillStyle = segment.color;
+            fillCone(ctx, x, y, fRadius, start, end);
+        }
+
+        //================== Draw the clock face
         ctx.beginPath();
         ctx.fillStyle = this.faceColor;
         ctx.arc(x, y, radius, 0, 360);
         ctx.fill();
         ctx.closePath();
         
-        // Draw the clock numbers
+        //================== Draw the clock numbers
         ctx.fillStyle = this.numeralColor;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -94,49 +156,45 @@ export class TimePiece {
             ctx.fillText(numeral, x, y);
         });
 
-        // Draw the clock hands
-        /** @param {CanvasRenderingContext2D} ctx */
-        function renderHand(ctx, x, y, length, progress) {
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            const [x2, y2] = circlePoint(x, y, length, (2 * Math.PI * progress) - Math.PI / 2);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-            ctx.closePath();
-        }
-
-        // Draw current hand
-        const date = new Date();        
+        //================== Draw current hand
+        const date = new Date();
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 10;
-        renderHand(ctx, x, y, radius * 0.8, date.getMinutes() / 60);
-        renderHand(ctx, x, y, radius * 0.5, date.getHours() / 12);
+        drawHand(ctx, x, y, radius * 0.8, date.getMinutes() / 60);
+        drawHand(ctx, x, y, radius * 0.5, date.getHours() / 12);
         ctx.strokeStyle = '#FF0000';
         ctx.lineWidth = 1;
-
+        
         if (this.secondMode === TimePieceSecondMode.Smooth) {
-            renderHand(ctx, x, y, radius, ((date.getSeconds() * 1000) + date.getMilliseconds()) / 60000);
+            drawHand(ctx, x, y, radius, ((date.getSeconds() * 1000) + date.getMilliseconds()) / 60000);
         } else if (this.secondMode === TimePieceSecondMode.Jittery) {
             const now = date.getSeconds() / 60;
             const next = (date.getSeconds() + 1) / 60;
             const progress  = date.getMilliseconds() / 1000;
             const jitter    = easeInBack(progress) * (next - now);
-            renderHand(ctx, x, y, radius, now + jitter);
+            drawHand(ctx, x, y, radius, now + jitter);
         } else {
-            renderHand(ctx, x, y, radius, date.getSeconds() / 60);
+            drawHand(ctx, x, y, radius, date.getSeconds() / 60);
         }
 
+        // Center Cap
         ctx.beginPath();
         ctx.arc(x, y, 10, 0, 360);
         ctx.fill();
         ctx.closePath();
 
+        // Debug
         ctx.fillStyle = 'black';
         ctx.font = ogFont;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'bottom';
         ctx.fillText("Frame: " + this.frame, 0, height);
         ctx.fillText("Now: " + (new Date()).toLocaleString(), 0, height - 10);
+        ctx.fillText("Mouse: " + this.mouse.position.toString(), 0, height - 20);
+        ctx.fillRect(this.mouse.x, this.mouse.y, 5, 5);
+        // Handle
+        ctx.fillText("Value: :" + this.handle.value, 0, height - 30);
+        this.handle.draw(ctx);
     }
 
     /** Queues the frame for rendering  */
@@ -144,7 +202,12 @@ export class TimePiece {
         if (this.canvas == null) 
             return false;
         return this._request = window.requestAnimationFrame(() => {
-            this.renderFrame();
+            try {
+                this.drawFrame();
+            }catch(e) {
+                console.error('Aborted Render:', e);
+                this.detatch();
+            }
         });
     }
 
@@ -156,6 +219,12 @@ export class TimePiece {
         this.ctx = canvas.getContext('2d');
         this.frame = 0;
 
+        this.mouse = new Mouse(this.canvas);
+
+        this.handle = new SlideHandle(canvas, this.mouse);
+        this.handle.position = [ 10, 10 ];
+        this.handle.length = 150;
+
         // Kick off the rendering
         this.queueFrame();
     }
@@ -166,6 +235,36 @@ export class TimePiece {
         if (this._request !== false)
             window.cancelAnimationFrame(this._request);
     }
+}
+
+/** @param {CanvasRenderingContext2D} ctx */
+function drawHand(ctx, x, y, length, progress, rounded = true) {
+    const [x2, y2] = circlePoint(x, y, length, (2 * Math.PI * progress) - Math.PI / 2);
+    if (rounded) {
+        ctx.beginPath();
+        ctx.arc(x2, y2, ctx.lineWidth/2, 0, 360);
+        ctx.fill();
+        ctx.closePath();
+    }
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.closePath();
+}
+
+function fillCone(ctx, x, y, radius, startRadians, endRadians) {
+    const [xa, ya] = circlePoint(x, y, radius, startRadians);
+    const [xb, yb] = circlePoint(x, y, radius, endRadians);
+    
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(xa, ya);
+    ctx.lineTo(xb, yb);
+    ctx.lineTo(x, y);
+    ctx.arc(x, y, radius, startRadians, endRadians);
+    ctx.fill();
+    ctx.closePath();
 }
 
 function circlePoints(x, y, radius, n, callback) {
