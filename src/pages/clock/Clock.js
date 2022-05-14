@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import { pointOnCircle, pointsOnCircle } from "../../utils/Math";
 import { easeInBack, easeOutElastic } from "../../utils/Smoothing";
 import { AngleHandle, Handler, SlideHandle } from "./Handles";
 
@@ -115,6 +116,8 @@ export class TimePiece {
         this.frame = 0;
 
         const { width, height } = canvas;
+        const fRadius =  Math.max(width, height) / 2.0;
+        const radius = fRadius * 0.75;
         const x = width / 2.0;
         const y = height / 2.0;
 
@@ -127,7 +130,7 @@ export class TimePiece {
         this.handles.registerHandle(this.slideHandle);
 
         const segment = new Segment(10, 14);
-        this.angleHandle = new AngleHandle([x, y], segment.startRadians, segment.endRadians);
+        this.angleHandle = new AngleHandle([x, y], radius, segment.startRadians, segment.endRadians);
         this.handles.registerHandle(this.angleHandle);
 
         // Kick off the rendering
@@ -183,7 +186,7 @@ export class TimePiece {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = '18pt Arial';
-        circlePoints(x, y, radius * 0.9, 12, (x, y, index) => {
+        pointsOnCircle(x, y, radius * 0.9, 12, (x, y, index) => {
             const numeral = (index + 2) % 12 + 1;
             ctx.fillText(numeral, x, y);
         });
@@ -249,7 +252,7 @@ export class TimePiece {
 
 /** @param {CanvasRenderingContext2D} ctx */
 function drawHand(ctx, x, y, length, progress, rounded = true) {
-    const [x2, y2] = circlePoint(x, y, length, (2 * Math.PI * progress) - Math.PI / 2);
+    const [x2, y2] = pointOnCircle(x, y, length, (2 * Math.PI * progress) - Math.PI / 2);
     if (rounded) {
         ctx.beginPath();
         ctx.arc(x2, y2, ctx.lineWidth/2, 0, 360);
@@ -264,8 +267,8 @@ function drawHand(ctx, x, y, length, progress, rounded = true) {
 }
 
 function fillCone(ctx, x, y, radius, startRadians, endRadians) {
-    const [xa, ya] = circlePoint(x, y, radius, startRadians);
-    const [xb, yb] = circlePoint(x, y, radius, endRadians);
+    const [xa, ya] = pointOnCircle(x, y, radius, startRadians);
+    const [xb, yb] = pointOnCircle(x, y, radius, endRadians);
     
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -277,15 +280,3 @@ function fillCone(ctx, x, y, radius, startRadians, endRadians) {
     ctx.closePath();
 }
 
-function circlePoints(x, y, radius, n, callback) {
-    for (let i = 0; i < n; i++) {
-        const [ x2, y2 ] = circlePoint(x, y, radius, 2 * Math.PI * i / n);
-        callback(x2, y2, i);
-    }
-}
-
-function circlePoint(x, y, radius, radians) {
-    const x2 = x + radius * Math.cos(radians);
-    const y2 = y + radius * Math.sin(radians);
-    return [ x2, y2 ];
-}

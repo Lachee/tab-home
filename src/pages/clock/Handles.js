@@ -1,3 +1,4 @@
+import { clamp } from "../../utils/Math";
 
 /** State Machine for the mouse */
 export class Handler {
@@ -169,7 +170,7 @@ class Handle {
 /** Handles regular rectangle handles */
 class RectHandle extends Handle {    
     get rect() { 
-        return [ 0, 0, 1, 1 ]; 
+        return [ 0, 0, 10, 10 ]; 
     }
 
     contains(x, y) {
@@ -268,15 +269,17 @@ export class SlideHandle extends RectHandle {
 export class AngleHandle extends RectHandle {
     x = 0;
     y = 0; 
+    radius = 50;
 
     value = 0.5;
 
     minAngle = 0;
     maxAngle = Math.PI;
 
-    constructor(position, minAngle, maxAngle) {
+    constructor(position, radius, minAngle, maxAngle) {
         super();
         this.position = position;
+        this.radius = radius;
         this.minAngle = minAngle;
         this.maxAngle = maxAngle;
     }
@@ -298,9 +301,13 @@ export class AngleHandle extends RectHandle {
         this.value = relative / diff;
     }
 
+    get rect() {
+        const width = 10;
+        const x = this.x;
+        const y = this.y;
+        return [ x, y, this.width, this.width ];
+    }
 
-}
 
-function clamp(v, min = 0, max = 1) {
-    return v < min ? min : (v > max ? max : v);
+
 }
