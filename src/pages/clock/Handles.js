@@ -1,4 +1,4 @@
-import { clamp, pointOnCircle, angle } from "../../utils/Math";
+import { clamp, pointOnCircle, angle, Radians2Degrees } from "../../utils/Math";
 
 /** State Machine for the mouse */
 export class Handler {
@@ -320,10 +320,9 @@ export class AngleHandle extends RectHandle {
     }
 
     onDrag(delta) {
-        const aOrigin = angle(...this.position, ...this.handler.grabOrigin);
-        const aMouse = angle(...this.position, ...this.handler.mousePosition);
-        this.angle = this._originAngle + (aMouse - aOrigin);
-        this.value = clamp(this.value);
+        const aMouse = angle( ...this.position, ...this.handler.mousePosition);
+        console.log(aMouse * Radians2Degrees, aMouse);
+        this.angle = clamp(aMouse, this.minAngle, this.maxAngle);
     }
 
     /**
@@ -338,7 +337,18 @@ export class AngleHandle extends RectHandle {
         ctx.arc(this.x, this.y, this.radius, this.minAngle, this.maxAngle);
         ctx.stroke();
         ctx.closePath();
-
+        
+        // Debug to verify angles
+        /*
+        const aMouse = angle( ...this.position, ...this.handler.mousePosition);
+        ctx.strokeStyle = 'red';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius * 0.75, 0, aMouse);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.fillText(`${aMouse.toFixed(2)}R, ${(aMouse * Radians2Degrees).toFixed(2)}°`, ...this.handler.mousePosition);
+        */
+       
         this.drawHandle(ctx);
     }
 }

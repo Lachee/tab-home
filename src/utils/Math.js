@@ -27,14 +27,22 @@ export function pointOnCircle(x, y, radius, radians) {
     return [ x2, y2 ];
 }
 
-export function angle(x1, y1, x2, y2) {
+/** Gets the signed radians between the two coordinates */
+export function angleSigned(x1, y1, x2, y2) {
     var dy = y2 - y1;
     var dx = x2 - x1;
-    var theta = Math.atan2(dy, dx); // range (-PI, PI]
-    //theta *= 180 / Math.PI; // rads to degs, range (-180, 180]
-    //if (theta < 0) theta = 360 + theta; // range [0, 360)
-    return theta;
+    return Math.atan2(dy, dx);
 }
+
+/** Gets the radians between two coordinates */
+export function angle(x1, y1, x2, y2) {
+    const signed = angleSigned(x1, y1, x2, y2);
+    if (signed < 0) return signed + 2*Math.PI;
+    return signed;
+}
+
+export const Radians2Degrees = 180 / Math.PI;
+export const Degrees2Radians = 180 * Math.PI;
 
 /**
  * Clamps two values
