@@ -238,16 +238,15 @@ export class RectHandle extends Handle {
 }
 
 export class CircleHandle extends Handle {
-    radius = 10;
-    get position() { return [0,0]; }
+    get handleCircle() { return [0,0, 10]; }
 
     contains(x, y) {
         if (Array.isArray(x))
             return this.contains(...x);
         
-        const [ x2, y2 ] = this.position;
+        const [ x2, y2, radius ] = this.handleCircle;
         const dist = Math.sqrt(Math.pow((x2 - x), 2) + Math.pow((y2 - y), 2));
-        return dist <= this.radius;
+        return dist <= radius;
     }
     
     /**
@@ -275,9 +274,9 @@ export class CircleHandle extends Handle {
         else 
             ctx.fillStyle = '#AAAAAA';
 
-        const [x, y] = this.position;
+        const [x, y, radius] = this.handleCircle;
         ctx.beginPath();
-        ctx.arc(x, y, this.radius, 0, 2 * Math.PI);
+        ctx.arc(x, y, radius, 0, 2 * Math.PI);
         ctx.stroke();
         ctx.fill();
     }

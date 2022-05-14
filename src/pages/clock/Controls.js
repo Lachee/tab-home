@@ -21,12 +21,14 @@ export class SlideControl extends RectHandle {
         return [ this.x, this.y ];
     }
 
+    /** If we want to be a rect */
     get handleRect() {
         const hWidth = this.width / 2;
         const x = this.x + (this.value * this.length) - hWidth;
         const y = this.y - hWidth;
         return [ x, y, this.width, this.width ];
     }
+
 
     onGrab() {
         this._originValue = this.value;
@@ -102,6 +104,12 @@ export class ArcControl extends RectHandle {
         const hWidth = this.handleWidth / 2;
         const [x, y] = pointOnCircle(this.x, this.y, this.radius, this.angle);
         return [ x - hWidth, y - hWidth, this.handleWidth, this.handleWidth];
+    }
+
+    /** If we want to be a circle */
+    get handleCircle() {
+        const [x, y] = pointOnCircle(this.x, this.y, this.radius, this.angle);
+        return [ x, y, this.handleWidth / 2 ];
     }
 
     onDrag(delta) {
