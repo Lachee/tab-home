@@ -1,4 +1,4 @@
-import { RectHandle } from './Handles';
+import { CircleHandle, RectHandle } from './Handles';
 import { clamp, pointOnCircle, angle } from '../../utils/Math';
 
 /** Basic slide handle */
@@ -17,12 +17,11 @@ export class SlideControl extends RectHandle {
         this.x = position.x || position[0];
         this.y = position.y || position[1];
     }
-
     get position() {
         return [ this.x, this.y ];
     }
 
-    get rect() {
+    get handleRect() {
         const hWidth = this.width / 2;
         const x = this.x + (this.value * this.length) - hWidth;
         const y = this.y - hWidth;
@@ -99,7 +98,7 @@ export class ArcControl extends RectHandle {
         this.value = clamp(relative / diff);
     }
 
-    get rect() {
+    get handleRect() {
         const hWidth = this.handleWidth / 2;
         const [x, y] = pointOnCircle(this.x, this.y, this.radius, this.angle);
         return [ x - hWidth, y - hWidth, this.handleWidth, this.handleWidth];
@@ -136,7 +135,7 @@ export class ArcControl extends RectHandle {
         ctx.fillText(`${aMouse.toFixed(2)}R, ${(aMouse * Radians2Degrees).toFixed(2)}°`, ...this.handler.mousePosition);
         */
         if (this.rotateHandle) {
-            const [ handleX, handleY, handleWidth, handleHeight ] = this.rect;
+            const [ handleX, handleY, handleWidth, handleHeight ] = this.handleRect;
             ctx.translate(handleX + (handleWidth / 2), handleY + (handleHeight / 2));
             ctx.rotate(this.angle);
             ctx.translate(-(handleX + (handleWidth / 2)), -(handleY + (handleHeight / 2)));

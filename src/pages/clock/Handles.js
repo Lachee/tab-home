@@ -33,7 +33,6 @@ export class Handler {
 
         // Mouse Move ( Hover & Drag )
         const mouseMove = (ev) => {  
-            console.log('mouse move', ev);  
             this._internalSetMouseTouch(ev);
 
             if (this.grabbed) {     // If we are grabbing and element, process the drag
@@ -54,7 +53,6 @@ export class Handler {
   
         // Mouse Down ( Grab )
         const mouseDown = (ev) => {   
-            console.log('mouse down', ev);  
             this._internalSetMouseTouch(ev);
             if (!this.grabbed) {
                 for(let handle of this.handles) {
@@ -68,7 +66,6 @@ export class Handler {
         };
         // Mouse Up ( Drop )
         const mouseUp = (ev) => {  
-            console.log('mouse up', ev);
             this._internalSetMouseTouch(ev);
             this.drop();
         };
@@ -196,14 +193,14 @@ class Handle {
 
 /** Handles regular rectangle handles */
 export class RectHandle extends Handle {    
-    get rect() { 
+    get handleRect() { 
         return [ 0, 0, 10, 10 ]; 
     }
 
     contains(x, y) {
         if (Array.isArray(x))
             return this.contains(...x);
-        const [ x1, y1, width, height ] = this.rect;
+        const [ x1, y1, width, height ] = this.handleRect;
         return x >= x1 && x <= (x1 + width) 
                 &&  y >= y1 && y <= (y1 + height);
     }
@@ -234,7 +231,53 @@ export class RectHandle extends Handle {
             ctx.fillStyle = '#AAAAAA';
 
         ctx.beginPath();
-        ctx.rect(...this.rect);
+        ctx.rect(...this.handleRect);
+        ctx.stroke();
+        ctx.fill();
+    }
+}
+
+export class CircleHandle extends Handle {
+    radius = 10;
+    get position() { return [0,0]; }
+
+    contains(x, y) {
+        if (Array.isArray(x))
+            return this.contains(...x);
+        
+        const [ x2, y2 ] = this.position;
+        const dist = Math.sqrt(Math.pow((x2 - x), 2) + Math.pow((y2 - y), 2));
+        return dist <= this.radius;
+    }
+    
+    /**
+     * Draws the control
+     * @param {CanvasRenderingContext2D} ctx 
+    */
+    draw(ctx){
+        this.drawHandle(ctx); 
+    }
+
+    /**
+     * Draws the current handle
+     * @param {CanvasRenderingContext2D} ctx 
+    */
+    drawHandle(ctx) {
+
+        ctx.lineWidth = 1;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#0A0A0A';
+
+        if (this.dragged)
+            ctx.fillStyle = '#555555';
+        else if (this.hovered)
+            ctx.fillStyle = 'white';
+        else 
+            ctx.fillStyle = '#AAAAAA';
+
+        const [x, y] = this.position;
+        ctx.beginPath();
+        ctx.arc(x, y, this.radius, 0, 2 * Math.PI);
         ctx.stroke();
         ctx.fill();
     }
