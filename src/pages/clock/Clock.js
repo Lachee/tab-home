@@ -129,8 +129,7 @@ export class TimePiece {
         this.slideHandle.length = 150;
         this.handler.registerHandle(this.slideHandle);
 
-        const segment = new Segment(10, 14);
-        this.angleHandle = new AngleHandle([x, y], radius, 0, 2 * Math.PI - 0.04);
+        this.angleHandle = new AngleHandle([x, y], radius, 0, 2 * Math.PI);
         this.handler.registerHandle(this.angleHandle);
 
         // Kick off the rendering

@@ -271,7 +271,6 @@ export class AngleHandle extends RectHandle {
     y = 0; 
     radius = 50;
 
-    _originAngle = 0;
     value = 0.5;
 
     minAngle = 0;
@@ -306,7 +305,7 @@ export class AngleHandle extends RectHandle {
     set angle(theta) {
         const diff = this.maxAngle - this.minAngle;
         const relative = theta - this.minAngle;
-        this.value = relative / diff;
+        this.value = clamp(relative / diff);
     }
 
     get rect() {
@@ -315,13 +314,8 @@ export class AngleHandle extends RectHandle {
         return [ x - hWidth, y - hWidth, this.handleWidth, this.handleWidth];
     }
 
-    onGrab() {
-        this._originAngle = this.angle;
-    }
-
     onDrag(delta) {
         const aMouse = angle( ...this.position, ...this.handler.mousePosition);
-        console.log(aMouse * Radians2Degrees, aMouse);
         this.angle = clamp(aMouse, this.minAngle, this.maxAngle);
     }
 
@@ -348,7 +342,7 @@ export class AngleHandle extends RectHandle {
         ctx.closePath();
         ctx.fillText(`${aMouse.toFixed(2)}R, ${(aMouse * Radians2Degrees).toFixed(2)}°`, ...this.handler.mousePosition);
         */
-       
+
         this.drawHandle(ctx);
     }
 }
