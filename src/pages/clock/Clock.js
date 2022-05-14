@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { easeInBack, easeOutElastic } from "../../utils/Smoothing";
-import { Mouse, SlideHandle } from "./Handles";
+import { Handler, SlideHandle } from "./Handles";
 
 // tutorial: https://blog.cloudboost.io/using-html5-canvas-with-react-ff7d93f5dc76
 // tutorial: https://reactjs.org/docs/refs-and-the-dom.html#legacy-api-string-refs
@@ -88,11 +88,8 @@ export class TimePiece {
     /** @type {Segment[]} list of segments */
     segments = [];
 
-    /** @type {SlideHandle} */
-    handle;
-
-    /** @type {Mouse} */
-    mouse;
+    /** @type {Handler} */
+    handles;
 
     constructor(canvas = null) {
         if (canvas)
@@ -190,12 +187,13 @@ export class TimePiece {
         ctx.textBaseline = 'bottom';
         ctx.fillText("Frame: " + this.frame, 0, height);
         ctx.fillText("Now: " + (new Date()).toLocaleString(), 0, height - 10);
-        ctx.fillText("Mouse: " + this.mouse.position.toString(), 0, height - 20);
-        //ctx.fillRect(this.mouse.x, this.mouse.y, 5, 5);
         
         // Handle
-        ctx.fillText("Value: :" + this.handle.value, 0, height - 30);
-        this.handle.draw(ctx);
+        ctx.fillText("Mouse: " + this.handles.mousePosition.toString(), 0, height - 20);
+        ctx.fillText("Value: :" + this.slideHandle.value, 0, height - 30);
+
+        // Draw all handles
+        this.handles.draw(ctx);
     }
 
     /** Queues the frame for rendering  */
@@ -220,11 +218,12 @@ export class TimePiece {
         this.ctx = canvas.getContext('2d');
         this.frame = 0;
 
-        this.mouse = new Mouse(this.canvas);
+        this.handles = new Handler(this.canvas);
 
-        this.handle = new SlideHandle(canvas, this.mouse);
-        this.handle.position = [ 10, 10 ];
-        this.handle.length = 150;
+        this.slideHandle = new SlideHandle(canvas);
+        this.slideHandle.position = [ 10, 10 ];
+        this.slideHandle.length = 150;
+        this.handles.registerHandle(this.slideHandle);
 
         // Kick off the rendering
         this.queueFrame();

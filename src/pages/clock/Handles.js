@@ -1,18 +1,17 @@
 
 /** State Machine for the mouse */
-export class Mouse {
+export class Handler {
 
     /** @type {HTMLElement} */
     element;
 
-    x = 0;
-    y = 0;
-
+    /** Current mouse position */
+    mousePosition = [0,0];
+    
     /** @type {Handle} currently grabbed handle */
     grabbed;
-
-    grabOrigin;
-    grabPosition;
+    grabOrigin      = [0,0];
+    grabPosition    = [0,0];
     get grabDelta() { 
         return [ this.grabPosition[0] - this.grabOrigin[0], this.grabPosition[1] - this.grabOrigin[1] ];
     }
@@ -23,61 +22,60 @@ export class Mouse {
     constructor(element) {
         this.element = element;
 
+        // Mouse Move ( Hover & Drag )
         this.element.addEventListener('mousemove', (ev) => {
-            this.x = ev.offsetX;
-            this.y = ev.offsetY;
+            this.mousePosition = [ ev.offsetX, ev.offsetY ];
 
-            if (this.grabbed) {
+            if (this.grabbed) {     // If we are grabbing and element, process the drag
                 this.element.style.cursor = 'grabbing';
-                this.grabPosition = this.position;
+                this.grabPosition = this.mousePosition;
                 this.grabbed.onDrag(this.grabDelta);
-            } else {                
+            } else {                // Otherwise for the first element we are within, we will call the onHover
                 let withinAnyHandle = false;
                 for(let handle of this.handles) {
-                    if (this.within(...handle.rect)) {
+                    if (handle.contains(this.mousePosition)) {
+                        handle.onHover();
                         withinAnyHandle = true;
                         break;
                     }
                 }
-
                 this.element.style.cursor = withinAnyHandle ? 'grab' : 'unset';
             }
         });
 
+        // Mouse Down ( Grab )
         this.element.addEventListener('mousedown', (ev) => {
-            this.x = ev.offsetX;
-            this.y = ev.offsetY;
+            this.mousePosition = [ ev.offsetX, ev.offsetY ];
 
             if (!this.grabbed) {
                 for(let handle of this.handles) {
-                    if (this.within(...handle.rect) && this.grab(handle))
-                        break;
+                    if (handle.contains(this.mousePosition)) {
+                        if (this.grab(handle)) {
+                            break;
+                        }
+                    }
                 }  
             }
         });
 
+        // Mouse Up ( Drop )
         this.element.addEventListener('mouseup', (ev) => {
-            this.x = ev.offsetX;
-            this.y = ev.offsetY;
+            this.mousePosition = [ ev.offsetX, ev.offsetY ];
             this.drop();
         })
-    }
-
-    get position() {
-        return [ this.x, this.y ];
     }
 
     grab(handle) {
         if (this.grabbed) return false;
         this.grabbed = handle;
-        this.grabOrigin = this.position;
+        this.grabOrigin = this.mousePosition;
         this.grabbed.onGrab();
         return true;
     }
 
     drop() {
         if (!this.grabbed) return false;
-        this.grabPosition = this.position;
+        this.grabPosition = this.mousePosition;
         this.grabbed.onDrop();
         this.grabbed = null;
         return true;
@@ -89,6 +87,7 @@ export class Mouse {
      */
     registerHandle(handle) {
         this.handles.push(handle);
+        handle.handler = this;
     }
 
     /**
@@ -97,13 +96,17 @@ export class Mouse {
      */
     unregisterHandle(handle) {
         this.handles = this.handles.filter((e) => e !== handle && e !== null);
+        handle.handler = null;
     }
-
-    /** Checks if the mouse is within the box */
-    within(x, y, width, height) {
-        if (Array.isArray(x)) return this.within(...x);
-        return this.x > x && this.x < (width + x) 
-                && this.y > y && this.y < (height + y);
+    
+    /**
+     * Draws all the handle controls
+     * @param {CanvasRenderingContext2D} ctx 
+    */
+    draw(ctx) {
+        for(let handle of this.handles) {
+            handle.draw(ctx);
+        }
     }
 }
 
@@ -112,39 +115,90 @@ export class Mouse {
  */
 class Handle {
 
-    /** @type {Mouse} mouse tracker */
-    mouse;
-
-    constructor(mouse) {
-        this.mouse = mouse || new Mouse(window);
-        this.mouse.registerHandle(this);
-    }
+    /** @type {Handler} mouse tracker */
+    handler;
 
     onGrab() {}
     onDrop() {}
     onDrag(delta) {}
+    onHover() {}
 
-    /** Rectangle used for grabbing */
-    get rect() {
-        return [ 0, 0, 0, 0 ];
+    /**
+     * Checks if the point is within this handle 
+     * @returns {boolean} */
+    contains(x, y) {
+        if (Array.isArray(x))
+            return this.contains(...x);
+        return false;
     }
-    
+
     /** @return {boolean} Is this handle currently grabbed? */
     get grabbed() {
-        return this.mouse.grabbed === this;
+        return this.handler && this.handler.grabbed === this;
     }
 
     /** @return {boolean} Is the handle currently hovered */
     get hovered() {
-        return this.mouse.grabbed == null && this.mouse.within(...this.rect);
+        return this.handler && this.handler.grabbed == null && this.contains(this.handler.mousePosition);
+    }
+    
+    /**
+     * Draws the control
+     * @param {CanvasRenderingContext2D} ctx 
+    */
+    draw(ctx) {
+        this.drawHandle(ctx);
+    }
+
+    /**
+     * Draws the handle for the specific control
+     * @param {CanvasRenderingContext2D} ctx 
+     */
+     drawHandle(ctx) { }
+}
+
+/** Handles regular rectangle handles */
+class RectHandle extends Handle {    
+    get rect() { 
+        return [ 0, 0, 1, 1 ]; 
+    }
+
+    contains(x, y) {
+        if (Array.isArray(x))
+            return this.contains(...x);
+        const [ x1, y1, width, height ] = this.rect;
+        return x >= x1 && x <= (x1 + width) 
+                &&  y >= y1 && y <= (y1 + height);
+    }
+    
+
+    /**
+     * Draws the current handle
+     * @param {CanvasRenderingContext2D} ctx 
+    */
+    drawHandle(ctx) {
+
+        ctx.lineWidth = 1;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#0A0A0A';
+
+        if (this.grabbed)
+            ctx.fillStyle = '#555555';
+        else if (this.hovered)
+            ctx.fillStyle = 'white';
+        else 
+            ctx.fillStyle = '#AAAAAA';
+
+        ctx.beginPath();
+        ctx.rect(...this.rect);
+        ctx.stroke();
+        ctx.fill();
     }
 }
 
 /** Basic slide handle */
-export class SlideHandle extends Handle {
+export class SlideHandle extends RectHandle {
 
-    /** @type {HTMLCanvasElement} */
-    canvas;
     x = 0;
     y = 0;
 
@@ -154,10 +208,6 @@ export class SlideHandle extends Handle {
     _originValue;
     value = 0.5;
 
-    constructor(canvas, mouse = null) {
-        super(mouse || new Mouse(canvas || window));
-        this.canvas = canvas;
-    }
 
     set position(position) {
         this.x = position.x || position[0];
@@ -185,13 +235,10 @@ export class SlideHandle extends Handle {
     }
         
     /**
-     * 
+     * Draws the control
      * @param {CanvasRenderingContext2D} ctx 
-     */
-    draw(ctx = null) {
-        if (ctx == null)
-            ctx = this.canvas.getContext('2d');
-
+    */
+    draw(ctx) {
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -200,30 +247,6 @@ export class SlideHandle extends Handle {
         ctx.stroke();
         ctx.closePath();
 
-        this._drawHandle(ctx);
-    }
-
-    
-    /**
-     * Draws the current handle
-     * @param {CanvasRenderingContext2D} ctx 
-     */
-    _drawHandle(ctx) {
-
-        ctx.lineWidth = 1;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#0A0A0A';
-
-        if (this.grabbed)
-            ctx.fillStyle = '#555555';
-        else if (this.hovered)
-            ctx.fillStyle = 'white';
-        else 
-            ctx.fillStyle = '#AAAAAA';
-
-        ctx.beginPath();
-        ctx.rect(...this.rect);
-        ctx.stroke();
-        ctx.fill();
+        this.drawHandle(ctx);
     }
 }
