@@ -1,13 +1,13 @@
-import { CircleHandle, RectHandle } from './Handles';
+import { CircleHandle, CompliantHandle, RectHandle } from './Handles';
 import { clamp, pointOnCircle, angle } from '../../utils/Math';
 
 /** Basic slide handle */
-export class SlideControl extends RectHandle {
+export class SlideControl extends CompliantHandle {
 
     x = 0;
     y = 0;
 
-    width = 10;
+    handleWidth = 10;
     length = 150;
 
     _originValue;
@@ -23,10 +23,13 @@ export class SlideControl extends RectHandle {
 
     /** If we want to be a rect */
     get handleRect() {
-        const hWidth = this.width / 2;
+        const hWidth = this.handleWidth / 2;
         const x = this.x + (this.value * this.length) - hWidth;
         const y = this.y - hWidth;
-        return [ x, y, this.width, this.width ];
+        return [ x, y, this.handleWidth, this.handleWidth ];
+    }
+    get handleCircle() {
+        return [ this.x + (this.value * this.length), this.y, this.handleWidth  ];
     }
 
 
@@ -55,7 +58,7 @@ export class SlideControl extends RectHandle {
     }
 }
 
-export class ArcControl extends RectHandle {
+export class ArcControl extends CompliantHandle {
     x = 0;
     y = 0; 
     radius = 50;
@@ -105,11 +108,9 @@ export class ArcControl extends RectHandle {
         const [x, y] = pointOnCircle(this.x, this.y, this.radius, this.angle);
         return [ x - hWidth, y - hWidth, this.handleWidth, this.handleWidth];
     }
-
-    /** If we want to be a circle */
     get handleCircle() {
         const [x, y] = pointOnCircle(this.x, this.y, this.radius, this.angle);
-        return [ x, y, this.handleWidth / 2 ];
+        return [ x, y, this.handleWidth  ];
     }
 
     onDrag(delta) {

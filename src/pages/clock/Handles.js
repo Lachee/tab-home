@@ -193,9 +193,7 @@ class Handle {
 
 /** Handles regular rectangle handles */
 export class RectHandle extends Handle {    
-    get handleRect() { 
-        return [ 0, 0, 10, 10 ]; 
-    }
+    get handleRect() { return [ 0, 0, 10, 10 ]; }
 
     contains(x, y) {
         if (Array.isArray(x))
@@ -281,3 +279,86 @@ export class CircleHandle extends Handle {
         ctx.fill();
     }
 }
+
+export const CompliantHandleMode = {
+    Mouse: 'mouse',
+    Touch: 'touch',
+}
+
+export class CompliantHandle extends Handle {
+
+    get handleRect() { return [ 0, 0, 10, 10 ]; }
+    get handleCircle() { return [0,0, 10]; }
+
+    #mode = CompliantHandleMode.Mouse;
+
+    #rect;
+    #circle;
+    #current;
+
+    constructor(mode = null) {
+        super();
+        this.#rect = new RectHandle();
+        Object.defineProperty(this.#rect, 'handleRect', {
+            get: () => this.handleRect
+        });
+
+        this.#circle = new CircleHandle();
+        Object.defineProperty(this.#circle, 'handleCircle', {
+            get: () => this.handleCircle
+        });
+        
+        this.mode = mode || (isTouchDevice() ? CompliantHandleMode.Touch : CompliantHandleMode.Mouse);
+    }
+
+    get mode() { return this.#mode; }
+    set mode(mode) {
+        switch(mode) {
+            default: throw new Error('Unkown compliance mode');
+            case CompliantHandleMode.Mouse:
+                this.#mode = CompliantHandleMode.Mouse;
+                this.#current = this.#rect;
+                break;
+
+            case CompliantHandleMode.Touch:
+                this.#mode = CompliantHandleMode.Touch;
+                this.#current = this.#circle;
+                break;
+        }
+    }
+
+    onGrab() {
+        this.#current.onGrab();
+    }
+    onDrop() {
+        this.#current.onDrop();
+    }
+    onDrag(delta) {
+        this.#current.onDrag(delta);
+    }
+    onHover() {        
+        this.#current.onHover();
+    }
+
+    /**
+     * Checks if the point is within this handle 
+     * @returns {boolean} */
+    contains(x, y) {
+        return this.#current.contains(x, y);
+    }
+
+    /**
+     * Draws the handle for the specific control
+     * @param {CanvasRenderingContext2D} ctx 
+     */
+     drawHandle(ctx) { 
+         this.#current.drawHandle(ctx);
+     }
+
+}
+
+function isTouchDevice() {
+    return (('ontouchstart' in window) ||
+       (navigator.maxTouchPoints > 0) ||
+       (navigator.msMaxTouchPoints > 0));
+  }
