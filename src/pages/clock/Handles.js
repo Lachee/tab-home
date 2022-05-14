@@ -232,12 +232,16 @@ export class RectHandle extends Handle {
         ctx.lineCap = 'round';
         ctx.strokeStyle = '#0A0A0A';
 
-        if (this.dragged)
+        if (this.dragged) {
             ctx.fillStyle = '#555555';
-        else if (this.hovered)
+            ctx.strokeStyle = '#0A0A0A';
+        } else if (this.hovered) {
             ctx.fillStyle = 'white';
-        else 
+            ctx.strokeStyle = '#000000';
+        } else { 
             ctx.fillStyle = '#AAAAAA';
+            ctx.strokeStyle = '#0A0A0A';
+        }
 
         ctx.beginPath();
         ctx.rect(...this.handleRect);
@@ -276,12 +280,16 @@ export class CircleHandle extends Handle {
         ctx.lineCap = 'round';
         ctx.strokeStyle = '#0A0A0A';
 
-        if (this.dragged)
+        if (this.dragged) {
             ctx.fillStyle = '#555555';
-        else if (this.hovered)
+            ctx.strokeStyle = '#0A0A0A';
+        } else if (this.hovered) {
             ctx.fillStyle = 'white';
-        else 
+            ctx.strokeStyle = '#000000';
+        } else { 
             ctx.fillStyle = '#AAAAAA';
+            ctx.strokeStyle = '#0A0A0A';
+        }
 
         const [x, y, radius] = this.handleCircle;
         ctx.beginPath();
@@ -295,6 +303,16 @@ export class CompliantHandle extends Handle {
     get handleRect() { return [ 0, 0, 10, 10 ]; }
     get handleCircle() { return [0,0, 10]; }
 
+    /** @return {boolean} Is this handle currently grabbed? */
+    get dragged() {
+        return this.handler && this.handler.grabbed === this;
+    }
+
+    /** @return {boolean} Is the handle currently hovered */
+    get hovered() {
+        return this.handler && this.handler.grabbed == null && this.contains(this.handler.mousePosition);
+    }
+    
     #mode = InputMethod.Mouse;
 
     #rect;
@@ -307,14 +325,14 @@ export class CompliantHandle extends Handle {
     constructor(mode = InputMethod.Touch) {
         super();
         this.#rect = new RectHandle();
-        Object.defineProperty(this.#rect, 'handleRect', {
-            get: () => this.handleRect
-        });
+        Object.defineProperty(this.#rect, 'handleRect', { get: () => this.handleRect  });
+        Object.defineProperty(this.#rect, 'dragged', { get: () => this.dragged  });
+        Object.defineProperty(this.#rect, 'hovered', { get: () => this.hovered  });
 
         this.#circle = new CircleHandle();
-        Object.defineProperty(this.#circle, 'handleCircle', {
-            get: () => this.handleCircle
-        });
+        Object.defineProperty(this.#circle, 'handleCircle', { get: () => this.handleCircle });
+        Object.defineProperty(this.#circle, 'dragged', { get: () => this.dragged  });
+        Object.defineProperty(this.#circle, 'hovered', { get: () => this.hovered  });
         
         this.mode = mode;
     }
@@ -362,6 +380,7 @@ export class CompliantHandle extends Handle {
      drawHandle(ctx) { 
         if (this.handler.inputMethod != this.mode)
             this.mode = this.handler.inputMethod;
+
 
         if (this.alwaysDrawRect)
             this.#rect.drawHandle(ctx);
