@@ -126,7 +126,7 @@ export class TimePiece {
         this.handler = new Handler(this.canvas, window);
 
         this.slideControl = new SlideControl();
-        this.slideControl.position = [ 10, 10 ];
+        this.slideControl.position = [ width - 200, 10 ];
         this.slideControl.length = 150;
         this.handler.registerHandle(this.slideControl);
 
