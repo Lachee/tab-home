@@ -1,4 +1,4 @@
-import { clamp, pointOnCircle, angle, Radians2Degrees, Degrees2Radians } from "../../utils/Math";
+import { clamp, pointOnCircle, angle } from "../../utils/Math";
 
 /** State Machine for the mouse */
 export class Handler {
