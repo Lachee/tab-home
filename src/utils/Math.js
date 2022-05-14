@@ -42,7 +42,7 @@ export function angle(x1, y1, x2, y2) {
 }
 
 export const Radians2Degrees = 180 / Math.PI;
-export const Degrees2Radians = 180 * Math.PI;
+export const Degrees2Radians = Math.PI / 180;
 
 /**
  * Clamps two values
