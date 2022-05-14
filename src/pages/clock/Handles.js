@@ -5,30 +5,36 @@ export class Handler {
     /** @type {HTMLElement} */
     element;
 
+    container;
+
     /** Current mouse position */
     mousePosition = [0,0];
     
     /** @type {Handle} currently grabbed handle */
     grabbed;
     grabOrigin      = [0,0];
-    grabPosition    = [0,0];
     get grabDelta() { 
-        return [ this.grabPosition[0] - this.grabOrigin[0], this.grabPosition[1] - this.grabOrigin[1] ];
+        return [ this.mousePosition[0] - this.grabOrigin[0], this.mousePosition[1] - this.grabOrigin[1] ];
     }
 
     /** @type {Handle[]} list of handles that can be grabbed */
     handles = [];
 
-    constructor(element) {
+    /**
+     * Creates a Handler that will track and manage interaction with handles
+     * @param {HTMLElement} element The element the mouse events are relative too.
+     * @param {HTMLElement|Window} container The container the mouse events are triggered from. Set to the window to have mouse update outside the phsyical bounds of the element.
+     */
+    constructor(element, container = null) {
         this.element = element;
+        this.container = container || element;
 
         // Mouse Move ( Hover & Drag )
-        this.element.addEventListener('mousemove', (ev) => {
-            this.mousePosition = [ ev.offsetX, ev.offsetY ];
+        this.container.addEventListener('mousemove', (ev) => {
+            this.#updateMousePosition(ev);
 
             if (this.grabbed) {     // If we are grabbing and element, process the drag
                 this.element.style.cursor = 'grabbing';
-                this.grabPosition = this.mousePosition;
                 this.grabbed.onDrag(this.grabDelta);
             } else {                // Otherwise for the first element we are within, we will call the onHover
                 let withinAnyHandle = false;
@@ -44,9 +50,8 @@ export class Handler {
         });
 
         // Mouse Down ( Grab )
-        this.element.addEventListener('mousedown', (ev) => {
-            this.mousePosition = [ ev.offsetX, ev.offsetY ];
-
+        this.container.addEventListener('mousedown', (ev) => {           
+            this.#updateMousePosition(ev);
             if (!this.grabbed) {
                 for(let handle of this.handles) {
                     if (handle.contains(this.mousePosition)) {
@@ -59,10 +64,15 @@ export class Handler {
         });
 
         // Mouse Up ( Drop )
-        this.element.addEventListener('mouseup', (ev) => {
-            this.mousePosition = [ ev.offsetX, ev.offsetY ];
+        this.container.addEventListener('mouseup', (ev) => {
+            this.#updateMousePosition(ev);
             this.drop();
         })
+    }
+
+    #updateMousePosition(event) {
+        const rect = this.element.getBoundingClientRect();
+        this.mousePosition = [ event.clientX - rect.left, event.clientY - rect.top ];
     }
 
     grab(handle) {
@@ -75,7 +85,6 @@ export class Handler {
 
     drop() {
         if (!this.grabbed) return false;
-        this.grabPosition = this.mousePosition;
         this.grabbed.onDrop();
         this.grabbed = null;
         return true;
@@ -171,6 +180,13 @@ class RectHandle extends Handle {
                 &&  y >= y1 && y <= (y1 + height);
     }
     
+    /**
+     * Draws the control
+     * @param {CanvasRenderingContext2D} ctx 
+    */
+    draw(ctx){
+        this.drawHandle(ctx); 
+    }
 
     /**
      * Draws the current handle
@@ -208,7 +224,6 @@ export class SlideHandle extends RectHandle {
     _originValue;
     value = 0.5;
 
-
     set position(position) {
         this.x = position.x || position[0];
         this.y = position.y || position[1];
@@ -230,8 +245,7 @@ export class SlideHandle extends RectHandle {
     }
 
     onDrag(delta) {
-        this.value = this._originValue + (delta[0] / this.length);
-        this.value = this.value < 0 ? 0 : (this.value > 1 ? 1 : this.value);
+        this.value = clamp(this._originValue + (delta[0] / this.length));
     }
         
     /**
@@ -249,4 +263,44 @@ export class SlideHandle extends RectHandle {
 
         this.drawHandle(ctx);
     }
+}
+
+export class AngleHandle extends RectHandle {
+    x = 0;
+    y = 0; 
+
+    value = 0.5;
+
+    minAngle = 0;
+    maxAngle = Math.PI;
+
+    constructor(position, minAngle, maxAngle) {
+        super();
+        this.position = position;
+        this.minAngle = minAngle;
+        this.maxAngle = maxAngle;
+    }
+
+    get position() {
+        return [ this.x, this.y ];
+    }
+    set position(position) {
+        this.x = position.x || position[0];
+        this.y = position.y || position[1];
+    }
+  
+    get angle() {
+        return this.minAngle + ((this.maxAngle  - this.minAngle) * clamp(this.value));
+    }
+    set angle(theta) {
+        const diff = this.maxAngle - this.minAngle;
+        const relative = theta - this.minAngle;
+        this.value = relative / diff;
+    }
+
+
+}
+
+function clamp(v, min = 0, max = 1) {
+    return v < min ? min : (v > max ? max : v);
 }

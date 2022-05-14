@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { easeInBack, easeOutElastic } from "../../utils/Smoothing";
-import { Handler, SlideHandle } from "./Handles";
+import { AngleHandle, Handler, SlideHandle } from "./Handles";
 
 // tutorial: https://blog.cloudboost.io/using-html5-canvas-with-react-ff7d93f5dc76
 // tutorial: https://reactjs.org/docs/refs-and-the-dom.html#legacy-api-string-refs
@@ -104,6 +104,41 @@ export class TimePiece {
         if (!segment.color)
             segment.color = this.segmentColors[(this.segments.length) % this.segmentColors.length];
         this.segments.push(segment);
+    }
+
+    attach(canvas) {
+        if (canvas === null) 
+            throw Error('Canvas is null. Did you mean detatch()?');
+        
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.frame = 0;
+
+        const { width, height } = canvas;
+        const x = width / 2.0;
+        const y = height / 2.0;
+
+
+        this.handles = new Handler(this.canvas, window);
+
+        this.slideHandle = new SlideHandle();
+        this.slideHandle.position = [ 10, 10 ];
+        this.slideHandle.length = 150;
+        this.handles.registerHandle(this.slideHandle);
+
+        const segment = new Segment(10, 14);
+        this.angleHandle = new AngleHandle([x, y], segment.startRadians, segment.endRadians);
+        this.handles.registerHandle(this.angleHandle);
+
+        // Kick off the rendering
+        this.queueFrame();
+    }
+
+    detatch() {
+        this.canvas = null;
+        this.ctx = null;
+        if (this._request !== false)
+            window.cancelAnimationFrame(this._request);
     }
 
     /** Renders a frame */
@@ -210,31 +245,6 @@ export class TimePiece {
         });
     }
 
-    attach(canvas) {
-        if (canvas === null) 
-            throw Error('Canvas is null. Did you mean detatch()?');
-        
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
-        this.frame = 0;
-
-        this.handles = new Handler(this.canvas);
-
-        this.slideHandle = new SlideHandle(canvas);
-        this.slideHandle.position = [ 10, 10 ];
-        this.slideHandle.length = 150;
-        this.handles.registerHandle(this.slideHandle);
-
-        // Kick off the rendering
-        this.queueFrame();
-    }
-
-    detatch() {
-        this.canvas = null;
-        this.ctx = null;
-        if (this._request !== false)
-            window.cancelAnimationFrame(this._request);
-    }
 }
 
 /** @param {CanvasRenderingContext2D} ctx */
