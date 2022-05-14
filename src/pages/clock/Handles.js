@@ -3,7 +3,7 @@ import { clamp, pointOnCircle, angle } from "../../utils/Math";
 /** State Machine for the mouse */
 export class Handler {
 
-    enableMouseControl = false;
+    enableMouseControl = true;
     enableTouchControl = true;
 
     /** @type {HTMLElement} */
