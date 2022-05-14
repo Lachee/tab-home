@@ -323,6 +323,7 @@ export class AngleHandle extends RectHandle {
         const aOrigin = angle(...this.position, ...this.handler.grabOrigin);
         const aMouse = angle(...this.position, ...this.handler.mousePosition);
         this.angle = this._originAngle + (aMouse - aOrigin);
+        this.value = clamp(this.value);
     }
 
     /**
@@ -337,7 +338,7 @@ export class AngleHandle extends RectHandle {
         ctx.arc(this.x, this.y, this.radius, this.minAngle, this.maxAngle);
         ctx.stroke();
         ctx.closePath();
-        
+
         this.drawHandle(ctx);
     }
 }

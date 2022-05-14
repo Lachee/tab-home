@@ -90,7 +90,7 @@ export class TimePiece {
     segments = [];
 
     /** @type {Handler} */
-    handles;
+    handler;
 
     constructor(canvas = null) {
         if (canvas)
@@ -122,16 +122,16 @@ export class TimePiece {
         const y = height / 2.0;
 
 
-        this.handles = new Handler(this.canvas, window);
+        this.handler = new Handler(this.canvas, window);
 
         this.slideHandle = new SlideHandle();
         this.slideHandle.position = [ 10, 10 ];
         this.slideHandle.length = 150;
-        this.handles.registerHandle(this.slideHandle);
+        this.handler.registerHandle(this.slideHandle);
 
         const segment = new Segment(10, 14);
         this.angleHandle = new AngleHandle([x, y], radius, segment.startAngle, segment.endAngle);
-        this.handles.registerHandle(this.angleHandle);
+        this.handler.registerHandle(this.angleHandle);
 
         // Kick off the rendering
         this.queueFrame();
@@ -227,11 +227,14 @@ export class TimePiece {
         ctx.fillText("Now: " + (new Date()).toLocaleString(), 0, height - 10);
         
         // Handle
-        ctx.fillText("Mouse: " + this.handles.mousePosition.toString(), 0, height - 20);
-        ctx.fillText("Value: :" + this.slideHandle.value, 0, height - 30);
+        let handleIndex = 1;
+        ctx.fillText("Mouse: " + this.handler.mousePosition.toString(), 0, 10);
+        for(let handle of this.handler.handles) {
+            ctx.fillText(handle.constructor.name + ": " + (handle.value * 100).toFixed(2) + "%", 0, (++handleIndex * 10));
+        }
 
         // Draw all handles
-        this.handles.draw(ctx);
+        this.handler.draw(ctx);
     }
 
     /** Queues the frame for rendering  */
