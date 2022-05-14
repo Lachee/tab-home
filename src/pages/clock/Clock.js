@@ -56,12 +56,12 @@ class Segment {
         this.endTime.setHours(endHours);
     }
 
-    getStartRadians() {
+    get startAngle() {
         const hours = this.startTime.getHours();
         return  (-Math.PI / 2) + (Math.PI*2)*(hours / 12.0);
     }
 
-    getEndRadians() {
+    get endAngle() {
         const hours = this.endTime.getHours();
         return  (-Math.PI / 2) + (Math.PI*2)*(hours / 12.0);
     }
@@ -130,7 +130,7 @@ export class TimePiece {
         this.handles.registerHandle(this.slideHandle);
 
         const segment = new Segment(10, 14);
-        this.angleHandle = new AngleHandle([x, y], radius, segment.startRadians, segment.endRadians);
+        this.angleHandle = new AngleHandle([x, y], radius, segment.startAngle, segment.endAngle);
         this.handles.registerHandle(this.angleHandle);
 
         // Kick off the rendering
@@ -168,8 +168,8 @@ export class TimePiece {
         //================== Draw segment backings
         for (let segment of this.segments) 
         {
-            const start = segment.getStartRadians();
-            const end = segment.getEndRadians();    
+            const start = segment.startAngle;
+            const end = segment.endAngle;    
             ctx.fillStyle = segment.color;
             fillCone(ctx, x, y, fRadius, start, end);
         }

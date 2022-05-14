@@ -1,4 +1,4 @@
-import { clamp } from "../../utils/Math";
+import { clamp, pointOnCircle, angle } from "../../utils/Math";
 
 /** State Machine for the mouse */
 export class Handler {
@@ -143,7 +143,7 @@ class Handle {
     }
 
     /** @return {boolean} Is this handle currently grabbed? */
-    get grabbed() {
+    get dragged() {
         return this.handler && this.handler.grabbed === this;
     }
 
@@ -199,7 +199,7 @@ class RectHandle extends Handle {
         ctx.lineCap = 'round';
         ctx.strokeStyle = '#0A0A0A';
 
-        if (this.grabbed)
+        if (this.dragged)
             ctx.fillStyle = '#555555';
         else if (this.hovered)
             ctx.fillStyle = 'white';
@@ -271,10 +271,13 @@ export class AngleHandle extends RectHandle {
     y = 0; 
     radius = 50;
 
+    _originAngle = 0;
     value = 0.5;
 
     minAngle = 0;
     maxAngle = Math.PI;
+
+    handleWidth = 10;
 
     constructor(position, radius, minAngle, maxAngle) {
         super();
@@ -282,6 +285,11 @@ export class AngleHandle extends RectHandle {
         this.radius = radius;
         this.minAngle = minAngle;
         this.maxAngle = maxAngle;
+
+        if (this.minAngle == undefined)
+            throw new Error('minAngle is undefined');
+        if (this.maxAngle == undefined) 
+            throw new Error('maxAngle is undefined');
     }
 
     get position() {
@@ -302,12 +310,34 @@ export class AngleHandle extends RectHandle {
     }
 
     get rect() {
-        const width = 10;
-        const x = this.x;
-        const y = this.y;
-        return [ x, y, this.width, this.width ];
+        const hWidth = this.handleWidth / 2;
+        const [x, y] = pointOnCircle(this.x, this.y, this.radius, this.angle);
+        return [ x - hWidth, y - hWidth, this.handleWidth, this.handleWidth];
     }
 
+    onGrab() {
+        this._originAngle = this.angle;
+    }
 
+    onDrag(delta) {
+        const aOrigin = angle(...this.position, ...this.handler.grabOrigin);
+        const aMouse = angle(...this.position, ...this.handler.mousePosition);
+        this.angle = this._originAngle + (aMouse - aOrigin);
+    }
 
+    /**
+     * Draws the control
+     * @param {CanvasRenderingContext2D} ctx 
+    */
+    draw(ctx) {
+
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, this.minAngle, this.maxAngle);
+        ctx.stroke();
+        ctx.closePath();
+        
+        this.drawHandle(ctx);
+    }
 }
