@@ -1,4 +1,4 @@
-import { clamp, pointOnCircle, angle, Radians2Degrees } from "../../utils/Math";
+import { clamp, pointOnCircle, angle, Radians2Degrees, Degrees2Radians } from "../../utils/Math";
 
 /** State Machine for the mouse */
 export class Handler {
@@ -278,6 +278,9 @@ export class AngleHandle extends RectHandle {
 
     handleWidth = 10;
 
+    rotateHandle = true;
+    trackStyle = 'gray';
+
     constructor(position, radius, minAngle, maxAngle) {
         super();
         this.position = position;
@@ -325,12 +328,14 @@ export class AngleHandle extends RectHandle {
     */
     draw(ctx) {
 
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, this.minAngle, this.maxAngle);
-        ctx.stroke();
-        ctx.closePath();
+        if (this.trackStyle  && this.trackStyle !== 'blank') {
+            ctx.strokeStyle = this.trackStyle;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, this.minAngle, this.maxAngle);
+            ctx.stroke();
+            ctx.closePath();
+        }
         
         // Debug to verify angles
         /*
@@ -342,7 +347,14 @@ export class AngleHandle extends RectHandle {
         ctx.closePath();
         ctx.fillText(`${aMouse.toFixed(2)}R, ${(aMouse * Radians2Degrees).toFixed(2)}°`, ...this.handler.mousePosition);
         */
+        if (this.rotateHandle) {
+            const [ handleX, handleY, handleWidth, handleHeight ] = this.rect;
+            ctx.translate(handleX + (handleWidth / 2), handleY + (handleHeight / 2));
+            ctx.rotate(this.angle);
+            ctx.translate(-(handleX + (handleWidth / 2)), -(handleY + (handleHeight / 2)));
+        }
 
         this.drawHandle(ctx);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
 }
