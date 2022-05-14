@@ -1,3 +1,10 @@
+
+export const InputMethod = {
+    Mouse: 'mouse',
+    Touch: 'touch',
+}
+
+
 /** State Machine for the mouse */
 export class Handler {
 
@@ -11,6 +18,7 @@ export class Handler {
 
     /** Current mouse position */
     mousePosition = [0,0];
+    inputMethod = InputMethod.Mouse;
     
     /** @type {Handle} currently grabbed handle */
     grabbed;
@@ -33,6 +41,7 @@ export class Handler {
 
         // Mouse Move ( Hover & Drag )
         const mouseMove = (ev) => {  
+            this.inputMethod = ev.touches ? InputMethod.Touch : InputMethod.Mouse;
             this._internalSetMouseTouch(ev);
 
             if (this.grabbed) {     // If we are grabbing and element, process the drag
@@ -52,7 +61,8 @@ export class Handler {
         };
   
         // Mouse Down ( Grab )
-        const mouseDown = (ev) => {   
+        const mouseDown = (ev) => {
+            this.inputMethod = ev.touches ? InputMethod.Touch : InputMethod.Mouse;
             this._internalSetMouseTouch(ev);
             if (!this.grabbed) {
                 for(let handle of this.handles) {
@@ -66,6 +76,7 @@ export class Handler {
         };
         // Mouse Up ( Drop )
         const mouseUp = (ev) => {  
+            this.inputMethod = ev.touches ? InputMethod.Touch : InputMethod.Mouse;
             this._internalSetMouseTouch(ev);
             this.drop();
         };
@@ -279,24 +290,21 @@ export class CircleHandle extends Handle {
         ctx.fill();
     }
 }
-
-export const CompliantHandleMode = {
-    Mouse: 'mouse',
-    Touch: 'touch',
-}
-
 export class CompliantHandle extends Handle {
 
     get handleRect() { return [ 0, 0, 10, 10 ]; }
     get handleCircle() { return [0,0, 10]; }
 
-    #mode = CompliantHandleMode.Mouse;
+    #mode = InputMethod.Mouse;
 
     #rect;
     #circle;
     #current;
 
-    constructor(mode = null) {
+    /** Always draw the rectangle mode */
+    alwaysDrawRect = true;
+
+    constructor(mode = InputMethod.Touch) {
         super();
         this.#rect = new RectHandle();
         Object.defineProperty(this.#rect, 'handleRect', {
@@ -308,20 +316,20 @@ export class CompliantHandle extends Handle {
             get: () => this.handleCircle
         });
         
-        this.mode = mode || (isTouchDevice() ? CompliantHandleMode.Touch : CompliantHandleMode.Mouse);
+        this.mode = mode;
     }
 
     get mode() { return this.#mode; }
     set mode(mode) {
         switch(mode) {
             default: throw new Error('Unkown compliance mode');
-            case CompliantHandleMode.Mouse:
-                this.#mode = CompliantHandleMode.Mouse;
+            case InputMethod.Mouse:
+                this.#mode = InputMethod.Mouse;
                 this.#current = this.#rect;
                 break;
 
-            case CompliantHandleMode.Touch:
-                this.#mode = CompliantHandleMode.Touch;
+            case InputMethod.Touch:
+                this.#mode = InputMethod.Touch;
                 this.#current = this.#circle;
                 break;
         }
@@ -352,13 +360,17 @@ export class CompliantHandle extends Handle {
      * @param {CanvasRenderingContext2D} ctx 
      */
      drawHandle(ctx) { 
-         this.#current.drawHandle(ctx);
+        if (this.handler.inputMethod != this.mode)
+            this.mode = this.handler.inputMethod;
+
+        if (this.alwaysDrawRect)
+            this.#rect.drawHandle(ctx);
+        else
+            this.#current.drawHandle(ctx);
      }
 
 }
 
 function isTouchDevice() {
-    return (('ontouchstart' in window) ||
-       (navigator.maxTouchPoints > 0) ||
-       (navigator.msMaxTouchPoints > 0));
+    return 'createTouch' in document;
   }
