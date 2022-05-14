@@ -1,7 +1,8 @@
 import React, { useRef } from "react";
 import { pointOnCircle, pointsOnCircle } from "../../utils/Math";
 import { easeInBack, easeOutElastic } from "../../utils/Smoothing";
-import { AngleHandle, Handler, SlideHandle } from "./Handles";
+import { Handler } from "./Handles";
+import { SlideControl, ArcControl } from "./Controls";
 
 // tutorial: https://blog.cloudboost.io/using-html5-canvas-with-react-ff7d93f5dc76
 // tutorial: https://reactjs.org/docs/refs-and-the-dom.html#legacy-api-string-refs
@@ -124,13 +125,13 @@ export class TimePiece {
 
         this.handler = new Handler(this.canvas, window);
 
-        this.slideHandle = new SlideHandle();
-        this.slideHandle.position = [ 10, 10 ];
-        this.slideHandle.length = 150;
-        this.handler.registerHandle(this.slideHandle);
+        this.slideControl = new SlideControl();
+        this.slideControl.position = [ 10, 10 ];
+        this.slideControl.length = 150;
+        this.handler.registerHandle(this.slideControl);
 
-        this.angleHandle = new AngleHandle([x, y], radius, 0, 2 * Math.PI);
-        this.handler.registerHandle(this.angleHandle);
+        this.arcControl = new ArcControl([x, y], radius, 0, 2 * Math.PI);
+        this.handler.registerHandle(this.arcControl);
 
         // Kick off the rendering
         this.queueFrame();
