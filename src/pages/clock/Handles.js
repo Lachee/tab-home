@@ -3,6 +3,9 @@ import { clamp, pointOnCircle, angle, Radians2Degrees, Degrees2Radians } from ".
 /** State Machine for the mouse */
 export class Handler {
 
+    enableMouseControl = false;
+    enableTouchControl = true;
+
     /** @type {HTMLElement} */
     element;
 
@@ -31,8 +34,9 @@ export class Handler {
         this.container = container || element;
 
         // Mouse Move ( Hover & Drag )
-        this.container.addEventListener('mousemove', (ev) => {
-            this.#updateMousePosition(ev);
+        const mouseMove = (ev) => {  
+            console.log('mouse move', ev);  
+            this._internalSetMouseTouch(ev);
 
             if (this.grabbed) {     // If we are grabbing and element, process the drag
                 this.element.style.cursor = 'grabbing';
@@ -48,11 +52,12 @@ export class Handler {
                 }
                 this.element.style.cursor = withinAnyHandle ? 'grab' : 'unset';
             }
-        });
-
+        };
+  
         // Mouse Down ( Grab )
-        this.container.addEventListener('mousedown', (ev) => {           
-            this.#updateMousePosition(ev);
+        const mouseDown = (ev) => {   
+            console.log('mouse down', ev);  
+            this._internalSetMouseTouch(ev);
             if (!this.grabbed) {
                 for(let handle of this.handles) {
                     if (handle.contains(this.mousePosition)) {
@@ -62,18 +67,42 @@ export class Handler {
                     }
                 }  
             }
-        });
-
+        };
         // Mouse Up ( Drop )
-        this.container.addEventListener('mouseup', (ev) => {
-            this.#updateMousePosition(ev);
+        const mouseUp = (ev) => {  
+            console.log('mouse up', ev);
+            this._internalSetMouseTouch(ev);
             this.drop();
-        })
+        };
+
+        if (this.enableMouseControl) {
+            this.container.addEventListener('mousemove', mouseMove);
+            this.container.addEventListener('mousedown', mouseDown);
+            this.container.addEventListener('mouseup', mouseUp);
+        }
+
+        if (this.enableTouchControl) {
+            this.container.addEventListener('touchmove', (ev) => {
+                mouseMove(ev);
+                ev.preventDefault();
+                //if (this.grabbed) 
+            }, { passive: false });
+
+            this.container.addEventListener('touchstart', mouseDown);
+            this.container.addEventListener('touchend', mouseUp);
+        }
     }
 
-    #updateMousePosition(event) {
+    _internalSetMouseTouch(touch) {
+        // If we are an array of touches, just set the first one.
+        if (touch.touches) {
+            if (touch.touches.length > 0)
+                this._internalSetMouseTouch(touch.touches[0]);
+            return;
+        }
+
         const rect = this.element.getBoundingClientRect();
-        this.mousePosition = [ event.clientX - rect.left, event.clientY - rect.top ];
+        this.mousePosition = [ touch.clientX - rect.left, touch.clientY - rect.top ];
     }
 
     grab(handle) {
