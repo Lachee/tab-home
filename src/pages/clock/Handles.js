@@ -133,6 +133,7 @@ export class Handler {
     registerHandle(handle) {
         this.handles.push(handle);
         handle.handler = this;
+        handle.onRegister(this);
     }
 
     /**
@@ -142,6 +143,7 @@ export class Handler {
     unregisterHandle(handle) {
         this.handles = this.handles.filter((e) => e !== handle && e !== null);
         handle.handler = null;
+        handle.onUnregister(this);
     }
     
     /**
@@ -158,7 +160,7 @@ export class Handler {
 /**
  * Handle that users can grab onto
  */
-class Handle {
+export class Handle {
 
     /** @type {Handler} mouse tracker */
     handler;
@@ -167,6 +169,11 @@ class Handle {
     onDrop() {}
     onDrag(delta) {}
     onHover() {}
+
+    /** @param {Handler} handler */
+    onRegister(handler) {}
+    /** @param {Handler} handler */
+    onUnregister(handler) {}
 
     /**
      * Checks if the point is within this handle 

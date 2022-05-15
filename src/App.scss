@@ -5,8 +5,13 @@
 
 @import '~bulma';
 
+
 * {
   color: rgb(185, 185, 185);
+}
+
+html {
+  background: hsl(0, 0%, 8.2%);
 }
 
 .App {

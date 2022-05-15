@@ -1,4 +1,4 @@
-import { CircleHandle, CompliantHandle, RectHandle } from './Handles';
+import { CircleHandle, CompliantHandle, Handle, RectHandle } from './Handles';
 import { clamp, pointOnCircle, angle } from '../../utils/Math';
 
 /** Basic slide handle */
@@ -153,4 +153,93 @@ export class ArcControl extends CompliantHandle {
         this.drawHandle(ctx);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
+}
+
+export class WedgeControl extends Handle {
+    x = 0;
+    y = 0; 
+    radius = 50;
+
+    minAngle = 0;
+    maxAngle = 2*Math.PI;
+
+    #arcA;
+    #arcB;
+
+    coneStroke = 'gray';
+
+    constructor(position, radius, minAngle, maxAngle) {
+        super();
+        this.radius = radius;
+        this.minAngle = minAngle;
+        this.maxAngle = maxAngle;
+
+        this.#arcA = new ArcControl(this.position, this.radius, this.minAngle, this.maxAngle);
+        this.#arcA.angle = this.minAngle;
+        this.#arcA.trackStyle = false;
+        
+        this.#arcB = new ArcControl(this.position, this.radius, this.minAngle, this.maxAngle);
+        this.#arcB.angle = this.maxAngle;
+        this.#arcB.trackStyle = false;
+        
+        this.position = position;
+    }
+
+    
+    get position() {
+        return [ this.x, this.y ];
+    }
+    set position(position) {
+        this.x = position.x || position[0];
+        this.y = position.y || position[1];
+        this.#arcA.position = position;
+        this.#arcB.position = position;
+    }
+  
+    get startAngle() { return Math.min(this.#arcA.angle, this.#arcB.angle); }
+    set startAngle(angle) {
+        if (this.#arcA.angle > this.#arcB.angle)
+            this.#arcB.angle = angle;
+        else
+            this.#arcA.angle = angle;
+    }
+
+    get endAngle() { return Math.max(this.#arcA.angle, this.#arcB.angle); }
+    set endAngle(angle) {
+        if (this.#arcA.angle < this.#arcB.angle)
+            this.#arcB.angle = angle;
+        else
+            this.#arcA.angle = angle;
+    }
+
+    onRegister(handler) {       
+        handler.registerHandle(this.#arcA);
+        handler.registerHandle(this.#arcB);
+    }
+
+    onUnregister(handler) {
+        handler.unregisterHandle(this.#arcA);
+        handler.unregisterHandle(this.#arcB);
+    }
+
+    /**
+     * Draws the handle for the specific control
+     * @param {CanvasRenderingContext2D} ctx 
+     */
+     drawHandle(ctx) { 
+        if (this.coneStroke) {
+            ctx.strokeStyle = this.coneStroke;
+            ctx.beginPath();
+            ctx.moveTo(...this.position);
+            ctx.lineTo(...this.#arcA.handleCircle);
+            ctx.stroke();
+            ctx.closePath();
+
+            ctx.beginPath();
+            ctx.moveTo(...this.position);
+            ctx.lineTo(...this.#arcB.handleCircle);
+            ctx.stroke();
+            ctx.closePath();
+        }
+     }
 }

@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { pointOnCircle, pointsOnCircle } from "../../utils/Math";
 import { easeInBack, easeOutElastic } from "../../utils/Smoothing";
 import { Handler } from "./Handles";
-import { SlideControl, ArcControl } from "./Controls";
+import { SlideControl, ArcControl, WedgeControl } from "./Controls";
 
 // tutorial: https://blog.cloudboost.io/using-html5-canvas-with-react-ff7d93f5dc76
 // tutorial: https://reactjs.org/docs/refs-and-the-dom.html#legacy-api-string-refs
@@ -27,7 +27,7 @@ export class Clock extends React.Component {
     }
 
     render() {
-        return <canvas  ref={this.canvas} {...this.props} style={{ background: 'white' }}/>
+        return <canvas  ref={this.canvas} {...this.props} style={{  }}/>
     }
 }
 
@@ -50,6 +50,9 @@ class Segment {
     /** @type {string} */
     color;
 
+    /** @type {WedgeControl} */
+    control;
+
     constructor(startHours, endHours) {
         this.startTime = new Date();
         this.startTime.setHours(startHours);
@@ -58,11 +61,17 @@ class Segment {
     }
 
     get startAngle() {
+        if (this.control) {
+            return this.control.startAngle;
+        }
         const hours = this.startTime.getHours();
         return  (-Math.PI / 2) + (Math.PI*2)*(hours / 12.0);
     }
 
     get endAngle() {
+        if (this.control) {
+            return this.control.endAngle;
+        }
         const hours = this.endTime.getHours();
         return  (-Math.PI / 2) + (Math.PI*2)*(hours / 12.0);
     }
@@ -97,8 +106,6 @@ export class TimePiece {
         if (canvas)
             this.attach(canvas);
 
-        const segment = new Segment(10, 14);
-        this.addSegment(segment);
 
     }
 
@@ -125,13 +132,28 @@ export class TimePiece {
 
         this.handler = new Handler(this.canvas, window);
 
+        /*
+        // Slide
         this.slideControl = new SlideControl();
         this.slideControl.position = [ width - 200, 10 ];
         this.slideControl.length = 150;
         this.handler.registerHandle(this.slideControl);
 
+        // Arc
         this.arcControl = new ArcControl([x, y], radius, 0, 2 * Math.PI);
         this.handler.registerHandle(this.arcControl);
+        */
+
+        const segment = new Segment(10, 14);
+        this.addSegment(segment);
+        
+        // Wedge
+        this.wedgeControl = new WedgeControl([x, y], radius * 1.25, 0, 2*Math.PI);
+        this.wedgeControl.coneStroke = false;
+        this.wedgeControl.startAngle = this.segments[0].startAngle;
+        this.wedgeControl.endAngle = this.segments[0].endAngle;
+        segment.control = this.wedgeControl;
+        this.handler.registerHandle(this.wedgeControl);
 
         // Kick off the rendering
         this.queueFrame();
