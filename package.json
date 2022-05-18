@@ -7,6 +7,8 @@
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",
     "bulma": "^0.9.3",
+    "bulmaswatch": "^0.8.1",
+    "js-yaml": "^4.1.0",
     "react": "^18.0.0",
     "react-bulma-components": "^4.1.0",
     "react-dom": "^18.0.0",

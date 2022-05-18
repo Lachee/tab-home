@@ -1,10 +1,9 @@
-@import '~bulma/sass/utilities/initial-variables';
-@import '~bulma/sass/utilities/functions';
+
 
 /** Define Colours */
 
 @import '~bulma';
-
+@import 'bulmaswatch/cyborg/bulmaswatch.scss';
 
 * {
   color: rgb(185, 185, 185);

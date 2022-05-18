@@ -5,6 +5,8 @@ specifiers:
   '@testing-library/react': ^12.1.4
   '@testing-library/user-event': ^13.5.0
   bulma: ^0.9.3
+  bulmaswatch: ^0.8.1
+  js-yaml: ^4.1.0
   react: ^18.0.0
   react-bulma-components: ^4.1.0
   react-dom: ^18.0.0
@@ -18,6 +20,8 @@ dependencies:
   '@testing-library/react': 12.1.5_ef5jwxihqo6n7gxfmzogljlgcm
   '@testing-library/user-event': 13.5.0
   bulma: 0.9.4
+  bulmaswatch: 0.8.1
+  js-yaml: 4.1.0
   react: 18.1.0
   react-bulma-components: 4.1.0_qdsdunn6i2rj5oy3z7eyt62jw4
   react-dom: 18.1.0_react@18.1.0
@@ -3248,6 +3252,10 @@ packages:
 
   /bulma/0.9.4:
     resolution: {integrity: sha512-86FlT5+1GrsgKbPLRRY7cGDg8fsJiP/jzTqXXVqiUZZ2aZT8uemEOHlU1CDU+TxklPEZ11HZNNWclRBBecP4CQ==}
+    dev: false
+
+  /bulmaswatch/0.8.1:
+    resolution: {integrity: sha512-7HGm5v9If6gzxbTht4/oVS0dhySp6g/JyTrxmpSXHXgDQXivvxiuVmcJOZo3PFv9GAOn4om7SK36I2V8W81sgw==}
     dev: false
 
   /bytes/3.0.0:
