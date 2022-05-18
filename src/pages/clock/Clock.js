@@ -298,9 +298,10 @@ function fillCone(ctx, x, y, radius, startRadians, endRadians) {
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(xa, ya);
-    ctx.lineTo(xb, yb);
-    ctx.lineTo(x, y);
     ctx.arc(x, y, radius, startRadians, endRadians);
+    ctx.lineTo(x, y);
+
+    ctx.stroke();
     ctx.fill();
     ctx.closePath();
 }

@@ -305,6 +305,22 @@ export class CircleHandle extends Handle {
         ctx.fill();
     }
 }
+
+/** Sets the getter for a property */
+export const mixinProperty = (handle, property, getter) => Object.defineProperty(handle, property, { get: getter  });
+
+/** Adds a function to the end of a onDrag */
+export const mixinOnDrag = (handle, onDrag) => {
+    const superDrag = handle.onDrag.bind(handle);
+    const baseDrag = onDrag.bind(handle);
+    Object.defineProperty(handle, 'onDrag', {
+        value: (delta) => { 
+            superDrag(delta); 
+            baseDrag(delta); 
+        }
+    });
+}
+
 export class CompliantHandle extends Handle {
 
     get handleRect() { return [ 0, 0, 10, 10 ]; }
@@ -332,14 +348,14 @@ export class CompliantHandle extends Handle {
     constructor(mode = InputMethod.Touch) {
         super();
         this.#rect = new RectHandle();
-        Object.defineProperty(this.#rect, 'handleRect', { get: () => this.handleRect  });
-        Object.defineProperty(this.#rect, 'dragged', { get: () => this.dragged  });
-        Object.defineProperty(this.#rect, 'hovered', { get: () => this.hovered  });
+        mixinProperty(this.#rect, 'handleRect', () => this.handleRect);
+        mixinProperty(this.#rect, 'dragged', () => this.dragged);
+        mixinProperty(this.#rect, 'hovered', () => this.hovered);
 
         this.#circle = new CircleHandle();
-        Object.defineProperty(this.#circle, 'handleCircle', { get: () => this.handleCircle });
-        Object.defineProperty(this.#circle, 'dragged', { get: () => this.dragged  });
-        Object.defineProperty(this.#circle, 'hovered', { get: () => this.hovered  });
+        mixinProperty(this.#circle, 'handleCircle', () => this.handleCircle);
+        mixinProperty(this.#circle, 'dragged', () => this.dragged);
+        mixinProperty(this.#circle, 'hovered', () => this.hovered);
         
         this.mode = mode;
     }

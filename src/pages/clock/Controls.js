@@ -1,4 +1,4 @@
-import { CircleHandle, CompliantHandle, Handle, RectHandle } from './Handles';
+import { CircleHandle, CompliantHandle, Handle, mixinOnDrag, RectHandle } from './Handles';
 import { clamp, pointOnCircle, angle } from '../../utils/Math';
 
 /** Basic slide handle */
@@ -177,11 +177,15 @@ export class WedgeControl extends Handle {
         this.#arcA = new ArcControl(this.position, this.radius, this.minAngle, this.maxAngle);
         this.#arcA.angle = this.minAngle;
         this.#arcA.trackStyle = false;
+        mixinOnDrag(this.#arcA, (delta) => {
+            // TODO: Determine if we exceed our cap and if so then we should drop and grab the end instead
+            // But we can only exceed based of the delta
+        });
         
         this.#arcB = new ArcControl(this.position, this.radius, this.minAngle, this.maxAngle);
         this.#arcB.angle = this.maxAngle;
         this.#arcB.trackStyle = false;
-        
+
         this.position = position;
     }
 
@@ -196,20 +200,14 @@ export class WedgeControl extends Handle {
         this.#arcB.position = position;
     }
   
-    get startAngle() { return Math.min(this.#arcA.angle, this.#arcB.angle); }
+    get startAngle() { return this.#arcA.angle}
     set startAngle(angle) {
-        if (this.#arcA.angle > this.#arcB.angle)
-            this.#arcB.angle = angle;
-        else
-            this.#arcA.angle = angle;
+        this.#arcA.angle = angle;
     }
 
-    get endAngle() { return Math.max(this.#arcA.angle, this.#arcB.angle); }
+    get endAngle() { return this.#arcB.angle; }
     set endAngle(angle) {
-        if (this.#arcA.angle < this.#arcB.angle)
-            this.#arcB.angle = angle;
-        else
-            this.#arcA.angle = angle;
+        this.#arcB.angle = angle;
     }
 
     onRegister(handler) {       
@@ -241,5 +239,13 @@ export class WedgeControl extends Handle {
             ctx.stroke();
             ctx.closePath();
         }
+
+        ctx.strokeStyle = 'magenta';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, this.startAngle, this.endAngle);
+        ctx.moveTo(...this.position);
+        ctx.lineTo(...this.#arcA.handleCircle);
+        ctx.stroke();
+        ctx.closePath();
      }
 }
