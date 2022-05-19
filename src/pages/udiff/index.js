@@ -1,5 +1,5 @@
 import React from "react";
-import { Diff } from "./Diff";
+import { Diff } from "./UDiff";
 
 export const UDiffPage = () => {
     return (
@@ -17,7 +17,7 @@ export class UDiffComponent extends React.Component {
     attemptDiff = async (original, modified) => {
         if (!original) return false;
         if (!modified) return false;
-        if (modified === original) return false;
+        //if (modified === original) return false;
 
         const diff = new Diff();
         diff.difference(original, modified);
