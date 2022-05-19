@@ -15,8 +15,9 @@ export class UDiffComponent extends React.Component {
     modifiedText;
 
     attemptDiff = async (original, modified) => {
-        if (!original) return false;
-        if (!modified) return false;
+        console.log('Attempt Diff', original, modified);
+        //if (!original) return false;
+        //if (!modified) return false;
         //if (modified === original) return false;
 
         const diff = new Diff();
@@ -61,6 +62,8 @@ export class UDiffComponent extends React.Component {
 
                 <label>Modified</label>
                 <input type="file" name="modified" onChange={(e) => this.onFileChanged(e)} />
+
+                <button onClick={(e) => this.attemptDiff(this.originalText, this.modifiedText)}>Attempt</button>
             </div >
         );
     }
